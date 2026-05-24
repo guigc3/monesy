@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Monesy">
+  <rect x="14" y="22" width="16" height="56" rx="6" fill="#00ACC1"/>
+  <rect x="70" y="22" width="16" height="56" rx="6" fill="#00ACC1"/>
+  <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#D4AF37"/>
+</svg>

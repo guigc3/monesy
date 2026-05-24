@@ -1,16 +1,48 @@
 # Documentação — Monesy
 
-Aplicação Flask + MySQL (produção) + frontend estático (HTML/CSS/JS), porta **5001**. O modo legado JSON em disco continua disponível para desenvolvimento local rápido e testes.
+Aplicação **Flask** (API + estáticos) + frontend **Vue 3 + Vite** em `frontend/`, porta **5001**. O modo legado JSON em disco continua disponível para desenvolvimento local rápido e testes.
 
 ## Executar
 
-### Modo dev (JSON)
+### Produção local (JSON, sem login)
+
+```bash
+cd frontend
+npm install
+npm run build
+cd ..
+py app.py
+```
+
+Abra [http://localhost:5001](http://localhost:5001). O Flask serve `frontend/dist/` quando essa pasta existe; caso contrário, cai no fallback `static-legacy/` (HTML/JS antigo).
+
+Dados em `data/*.json`. Sem login.
+
+### Desenvolvimento do frontend (hot reload)
+
+Em dois terminais:
 
 ```bash
 py app.py
 ```
 
-Abra [http://localhost:5001](http://localhost:5001). Dados em `data/*.json`. Sem login.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Abra [http://localhost:5173](http://localhost:5173). O Vite faz proxy de `/api`, `/design-system` e `/logos` para o Flask em `http://localhost:5001`.
+
+### Modo dev rápido (só API + build já feito)
+
+Se `frontend/dist/` já existir:
+
+```bash
+py app.py
+```
+
+Abra [http://localhost:5001](http://localhost:5001).
 
 ### Modo MySQL (produção)
 
@@ -26,15 +58,17 @@ Não recomendado para novas instalações. Ver `README.md` se ainda precisar man
 ## Arquitetura
 
 ```
-Frontend (auth.js → login MySQL ou sessão json)
-   │  fetch(..., Authorization: Bearer <jwt>)
+Vue 3 SPA (frontend/src — Pinia, Vue Router, Chart.js)
+   │  fetch /api/* (Authorization: Bearer quando mysql/supabase)
    ▼
 Flask (auth.py valida JWT → g.user_id)
-   │
+   │  estáticos: frontend/dist/ + /design-system/ + /logos/
    ├── JsonRepository      (modo dev, data/*.json)
    ├── MySQLRepository     (modo produção, PyMySQL, filtra por user_id)
    └── SupabaseRepository  (legado, Postgres + RLS)
 ```
+
+Deploy em produção: ver [DEPLOY.md](DEPLOY.md) (`npm run build` antes de subir o Flask).
 
 A escolha entre repositórios é feita a cada request por `db.repositories.get_repository()` a partir de `auth.storage_backend()`:
 
@@ -153,14 +187,30 @@ Isolamento por `user_id` em todas as queries — sem RLS; o filtro é explícito
 
 Schema completo: `mysql_schema.sql`.
 
-## Frontend (`static/`)
+## Frontend (`frontend/`)
 
-- `auth.js`: em modo **mysql**, login/cadastro via `/api/auth/login` e `/api/auth/register`; JWT em `localStorage`; dispara `app:ready`
-- `auth.js`: em modo **supabase** (legado), usa `@supabase/supabase-js` carregado condicionalmente
-- `app.js`: estado, `loadMes()`, `refreshCaixaFromState()` para cards de caixa, envia `Bearer` no `api()`
-- Modo escuro via `localStorage`
-- Chart.js para gráfico anual
+| Pasta / arquivo | Função |
+|-----------------|--------|
+| `src/stores/auth.js` | Login json / mysql (JWT) / supabase (SDK via CDN) |
+| `src/stores/gastos.js` | Gastos mensais, cache, Excel, lixeira |
+| `src/stores/assinaturas.js` | Assinaturas recorrentes |
+| `src/services/api.js` | Cliente HTTP com Bearer, loading e cache |
+| `src/router/index.js` | Rotas `/gastos`, `/assinaturas`, `/features` |
+| `src/assets/monesy-extensions.css` | Tema escuro, mobile, modais, tabelas responsivas |
+| `index.html` | Link para `/design-system/ui_kits/web-app/app.css` (servido pelo Flask) |
+
+Build de produção: `cd frontend && npm run build` → `frontend/dist/` (ignorado pelo git; gere no deploy ou localmente).
+
+Código HTML/JS anterior: `static-legacy/` (somente referência; não é mais o frontend ativo).
+
+Histórico da migração: [MIGRATION_PLAN.md](MIGRATION_PLAN.md).
 
 ## Testes
 
 `tests/test_api.py` — CRUD, caixa, pago, investido, lixeira, limpar mês, revisão, seções, template Excel, assinaturas (CRUD/histórico/filtros), features, `/api/config` e bloqueio 401 em modos autenticados sem token.
+
+Smoke do SPA Vue (requer `npm run build`):
+
+```bash
+py scripts/verify_vue_serve.py
+```

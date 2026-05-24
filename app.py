@@ -24,7 +24,12 @@ from db.repositories import (
     get_repository,
 )
 
-app = Flask(__name__, static_folder="static", static_url_path="")
+_FRONTEND_DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "dist")
+_STATIC_LEGACY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static-legacy")
+
+# Serve Vue dist se existir, senão serve o static legado
+_static_folder = _FRONTEND_DIST if os.path.isdir(_FRONTEND_DIST) else _STATIC_LEGACY
+app = Flask(__name__, static_folder=_static_folder, static_url_path="")
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,8 +48,8 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 
 def _ensure_design_system_static_link():
-    """Espelha Design System/ em static/design-system para servir CSS/fontes/logos."""
-    static_ds = os.path.join(BASE_DIR, "static", "design-system")
+    """Espelha Design System/ em static-legacy/design-system (referência legado)."""
+    static_ds = os.path.join(BASE_DIR, "static-legacy", "design-system")
     if os.path.exists(static_ds):
         return
     if not os.path.isdir(DESIGN_SYSTEM_DIR):
@@ -61,8 +66,8 @@ def _ensure_design_system_static_link():
             os.symlink(DESIGN_SYSTEM_DIR, static_ds, target_is_directory=True)
     except OSError:
         print(
-            "AVISO: static/design-system ausente. Crie o link para Design System/ "
-            "ou reinicie apos: mklink /J static\\design-system \"Design System\""
+            "AVISO: static-legacy/design-system ausente. Crie o link para Design System/ "
+            "ou reinicie apos: mklink /J static-legacy\\design-system \"Design System\""
         )
 
 
@@ -1287,6 +1292,29 @@ def list_features():
     items = repo.list_features()
     items.sort(key=lambda x: x.get("implementado_em") or "", reverse=True)
     return jsonify({"features": items, "total": len(items)})
+
+
+# ── SPA catch-all ────────────────────────────────────────────────────────────
+# Flask's built-in static serving intercepts requests first.
+# We use @errorhandler(404) to catch files-not-found and serve index.html
+# for Vue Router URLs (anything that's not /api/*)
+@app.errorhandler(404)
+def spa_fallback(e):
+    """Para qualquer 404 que não seja /api/, serve o Vue SPA (index.html)."""
+    dist = app.static_folder
+    if not dist:
+        return jsonify({"error": "Not found"}), 404
+
+    # Deixa APIs retornarem 404 normalmente
+    from flask import request as _req
+    if _req.path.startswith("/api/"):
+        return jsonify({"error": "Not found"}), 404
+
+    index = os.path.join(dist, "index.html")
+    if os.path.exists(index):
+        return send_from_directory(dist, "index.html")
+
+    return jsonify({"error": "Not found"}), 404
 
 
 if __name__ == "__main__":
