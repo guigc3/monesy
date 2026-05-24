@@ -3,7 +3,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    redirect: '/gastos',
+    redirect: '/visao-geral',
+  },
+  {
+    path: '/visao-geral',
+    name: 'visao-geral',
+    component: () => import('@/views/VisaoGeralView.vue'),
   },
   {
     path: '/gastos',
@@ -20,8 +25,8 @@ const routes = [
     name: 'features',
     component: () => import('@/views/FeaturesView.vue'),
   },
-  // Catch-all — redireciona para gastos
-  { path: '/:pathMatch(.*)*', redirect: '/gastos' },
+  // Catch-all — redireciona para visão geral
+  { path: '/:pathMatch(.*)*', redirect: '/visao-geral' },
 ]
 
 const router = createRouter({

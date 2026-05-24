@@ -74,6 +74,7 @@ const { darkMode, toggleTheme } = useTheme()
 const currentView = ref(null)
 
 const tabs = [
+  { to: '/visao-geral',  name: 'visao-geral',  label: 'Visão Geral' },
   { to: '/gastos',       name: 'gastos',       label: 'Gastos mensais' },
   { to: '/assinaturas',  name: 'assinaturas',  label: 'Assinaturas' },
   { to: '/features',     name: 'features',     label: 'Features' },

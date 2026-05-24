@@ -31,8 +31,8 @@
     </div>
 
     <div class="header-actions" id="headerActions">
-      <!-- Seletor de ano — apenas na aba gastos -->
-      <label v-if="isGastos" class="field-inline">
+      <!-- Seletor de ano — nas abas gastos e visão geral -->
+      <label v-if="isGastos || isVisaoGeral" class="field-inline">
         Ano
         <div class="field-with-action ano-wrapper">
           <select :value="gastosStore.ano" @change="changeAno">
@@ -156,9 +156,11 @@ const menuOpen = ref(false)
 const fileInput = ref(null)
 
 const isGastos = computed(() => route.name === 'gastos')
+const isVisaoGeral = computed(() => route.name === 'visao-geral')
 const isAssinaturas = computed(() => route.name === 'assinaturas')
 
 const VIEW_SUBTITLES = {
+  'visao-geral': 'Cards consolidados e gráfico anual',
   gastos: 'Receitas, despesas e saldo mensal',
   assinaturas: 'Assinaturas e custos recorrentes no cartão',
   features: 'Histórico de funcionalidades entregues',

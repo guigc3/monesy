@@ -1,33 +1,34 @@
 /**
- * Calcula a versão do app a partir de version.json e do total de commits.
- * major=1, baseCommitCount=N → v1 na baseline; +0,1 a cada commit seguinte.
- * Para ir à v2: altere major para 2 e baseCommitCount para o total de commits atual.
+ * Computa a versão do app para injeção em __APP_VERSION__ no build do Vite.
+ * Usa: git describe --tags --abbrev=7 (se disponível) ou data YYYY-MM-DD.
  */
 import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { join } from 'path'
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-
-export function computeAppVersion(cwd = root) {
-  const cfg = JSON.parse(readFileSync(resolve(cwd, 'version.json'), 'utf8'))
-  const major = Number(cfg.major) || 1
-  const base = Number(cfg.baseCommitCount) || 0
-
-  let commits = base
+export function computeAppVersion(rootDir) {
+  // 1. Tenta git describe
   try {
-    commits = parseInt(
-      execSync('git rev-list --count HEAD', { cwd, stdio: ['ignore', 'pipe', 'ignore'] })
-        .toString()
-        .trim(),
-      10
-    )
-  } catch (_) {
-    /* fora de repo git ou git indisponível */
+    const tag = execSync('git describe --tags --always --abbrev=7', {
+      cwd: rootDir,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim()
+    if (tag) return tag
+  } catch {
+    /* sem git ou sem tags */
   }
 
-  const steps = Math.max(0, commits - base)
-  if (steps === 0) return String(major)
-  return (major + steps * 0.1).toFixed(1)
+  // 2. Tenta ler version do package.json do frontend
+  try {
+    const pkg = JSON.parse(readFileSync(join(rootDir, 'frontend', 'package.json'), 'utf8'))
+    if (pkg.version) return pkg.version
+  } catch {
+    /* ignora */
+  }
+
+  // 3. Fallback: data de build
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }

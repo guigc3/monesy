@@ -51,11 +51,14 @@ os.makedirs(DATA_DIR, exist_ok=True)
 def _ensure_design_system_static_link():
     """Espelha Design System/ em static-legacy/design-system (referência legado)."""
     static_ds = os.path.join(BASE_DIR, "static-legacy", "design-system")
-    if os.path.exists(static_ds):
+    # Usa lexists para detectar junctions/symlinks quebrados também
+    if os.path.lexists(static_ds):
         return
     if not os.path.isdir(DESIGN_SYSTEM_DIR):
         return
     try:
+        # Garante que o diretório pai existe
+        os.makedirs(os.path.dirname(static_ds), exist_ok=True)
         if os.name == "nt":
             import subprocess
             subprocess.run(
@@ -65,7 +68,7 @@ def _ensure_design_system_static_link():
             )
         else:
             os.symlink(DESIGN_SYSTEM_DIR, static_ds, target_is_directory=True)
-    except OSError:
+    except (OSError, Exception):
         print(
             "AVISO: static-legacy/design-system ausente. Crie o link para Design System/ "
             "ou reinicie apos: mklink /J static-legacy\\design-system \"Design System\""

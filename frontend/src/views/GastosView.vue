@@ -1,8 +1,6 @@
 <template>
   <main class="container view-gastos">
     <MonthTabs />
-    <SummaryCards />
-    <ConsolidatedPanel />
 
     <div class="mes-actions">
       <button
@@ -19,8 +17,6 @@
         Limpar mês
       </button>
     </div>
-
-    <AnnualChart />
 
     <TagFilter />
 
@@ -56,9 +52,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import MonthTabs from '@/components/gastos/MonthTabs.vue'
-import SummaryCards from '@/components/gastos/SummaryCards.vue'
-import ConsolidatedPanel from '@/components/gastos/ConsolidatedPanel.vue'
-import AnnualChart from '@/components/gastos/AnnualChart.vue'
 import LancamentosPanel from '@/components/gastos/LancamentosPanel.vue'
 import TagFilter from '@/components/gastos/TagFilter.vue'
 import LancamentoModal from '@/components/modals/LancamentoModal.vue'
