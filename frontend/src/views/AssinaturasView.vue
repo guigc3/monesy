@@ -132,6 +132,7 @@ defineExpose({
 })
 
 async function load() {
+  if (assinaturasStore.loaded) return
   loading.value = true
   error.value = ''
   try {

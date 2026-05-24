@@ -10,12 +10,10 @@
         <span class="feature-count-badge">{{ visibleFeatures.length }}</span>
       </div>
 
-      <!-- Timeline -->
       <div class="features-timeline-section">
         <h3 class="features-timeline-heading">Linha do tempo</h3>
         <div class="features-timeline-scroll">
           <div class="features-timeline" role="tablist" aria-label="Datas de implementação">
-            <!-- Botão "Todas" -->
             <button
               type="button"
               class="timeline-node timeline-node-all"
@@ -25,10 +23,10 @@
               @click="selectDate(null)"
             >
               <span class="timeline-date">Todas</span>
-              <span class="timeline-count">{{ all.length }}</span>
+              <span class="timeline-count">{{ featuresStore.all.length }}</span>
             </button>
 
-            <template v-for="(date, idx) in dates" :key="date">
+            <template v-for="date in dates" :key="date">
               <span class="timeline-connector" aria-hidden="true"></span>
               <button
                 type="button"
@@ -47,7 +45,6 @@
         <p class="features-filter-caption" aria-live="polite">{{ filterCaption }}</p>
       </div>
 
-      <!-- Lista -->
       <div v-if="loading" class="empty-state" style="padding:32px">Carregando…</div>
       <div v-else-if="error" class="empty-state" style="padding:32px;color:var(--red)">{{ error }}</div>
       <ol v-else class="features-list" aria-label="Lista de features">
@@ -68,20 +65,20 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { api } from '@/services/api'
+import { useFeaturesStore } from '@/stores/features'
 import { useToast } from '@/composables/useToast'
 import { fmtTs, fmtDataBr } from '@/utils/format'
 
+const featuresStore = useFeaturesStore()
 const { toast } = useToast()
 
-const all = ref([])
 const selectedDate = ref(null)
 const loading = ref(false)
 const error = ref('')
 
 const byDate = computed(() => {
   const map = new Map()
-  for (const item of all.value) {
+  for (const item of featuresStore.all) {
     const date = String(item.implementado_em || '').slice(0, 10)
     if (!date) continue
     if (!map.has(date)) map.set(date, [])
@@ -95,14 +92,14 @@ const dates = computed(() =>
 )
 
 const visibleFeatures = computed(() => {
-  if (!selectedDate.value) return all.value
-  return all.value.filter(
+  if (!selectedDate.value) return featuresStore.all
+  return featuresStore.all.filter(
     (f) => String(f.implementado_em || '').slice(0, 10) === selectedDate.value
   )
 })
 
 const filterCaption = computed(() => {
-  const total = all.value.length
+  const total = featuresStore.all.length
   const visible = visibleFeatures.value.length
   if (!selectedDate.value) {
     return total ? `Exibindo todas as ${total} features cadastradas. Clique em uma data na linha do tempo para filtrar.` : ''
@@ -116,11 +113,11 @@ function selectDate(date) {
 }
 
 async function load() {
+  if (featuresStore.loaded) return
   loading.value = true
   error.value = ''
   try {
-    const data = await api('/api/features')
-    all.value = data.features || []
+    await featuresStore.load()
     selectedDate.value = null
   } catch (err) {
     error.value = err.message

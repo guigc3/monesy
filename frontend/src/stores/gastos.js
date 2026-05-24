@@ -32,6 +32,7 @@ export const useGastosStore = defineStore('gastos', () => {
   const totaisMes = ref({})
   const anos = ref([])
   const chartData = ref(null)
+  const loaded = ref(false)
 
   // ─── Totais derivados ────────────────────────────────────────────
   const totalPagoDespesas = computed(() =>
@@ -78,6 +79,55 @@ export const useGastosStore = defineStore('gastos', () => {
       liquido: totaisMes.value.liquido ?? entrada - saida,
     }
   })
+
+  // ─── Cache sync ──────────────────────────────────────────────────
+  function _applyMesResumo(resumo) {
+    totaisMes.value = { ...(resumo.totais || {}) }
+    receitasSecoes.value = resumo.receitas_por_secao || []
+    despesasSecoes.value = resumo.despesas_por_secao || []
+  }
+
+  function applyFromCache() {
+    if (cacheHas(CK.secoes)) secoes.value = cacheGet(CK.secoes)
+    if (cacheHas(CK.tags)) allTags.value = cacheGet(CK.tags)
+    if (cacheHas(CK.anos)) {
+      const lista = cacheGet(CK.anos)
+      if (!lista.includes(ano.value)) ano.value = lista[0] || ano.value
+      anos.value = lista.length ? lista : [ano.value]
+    }
+    if (cacheHas(CK.mrev(ano.value))) {
+      mesesRevisados.value = new Set(cacheGet(CK.mrev(ano.value)))
+    }
+    if (cacheHas(CK.mes(ano.value, mes.value))) {
+      _applyMesResumo(cacheGet(CK.mes(ano.value, mes.value)))
+    }
+    if (cacheHas(CK.chart(ano.value))) {
+      chartData.value = cacheGet(CK.chart(ano.value))
+    }
+    loaded.value = true
+  }
+
+  function reset() {
+    ano.value = new Date().getFullYear()
+    mes.value = new Date().getMonth() + 1
+    secoes.value = { receita: [], despesa: [] }
+    allTags.value = []
+    mesesRevisados.value = new Set()
+    despesasSecoes.value = []
+    receitasSecoes.value = []
+    totaisMes.value = {}
+    anos.value = []
+    chartData.value = null
+    loaded.value = false
+  }
+
+  function _patchMesCache(updater) {
+    const key = CK.mes(ano.value, mes.value)
+    if (!cacheHas(key)) return
+    const resumo = cacheGet(key)
+    updater(resumo)
+    cacheSet(key, resumo)
+  }
 
   // ─── Helpers ────────────────────────────────────────────────────
   function findReceitaItem(id) {
@@ -166,9 +216,7 @@ export const useGastosStore = defineStore('gastos', () => {
       resumo = await api(`/api/resumo?ano=${ano.value}&mes=${mes.value}`)
       cacheSet(key, resumo)
     }
-    totaisMes.value = { ...(resumo.totais || {}) }
-    receitasSecoes.value = resumo.receitas_por_secao || []
-    despesasSecoes.value = resumo.despesas_por_secao || []
+    _applyMesResumo(resumo)
   }
 
   async function loadChart() {
@@ -209,6 +257,7 @@ export const useGastosStore = defineStore('gastos', () => {
     toast('Lançamento excluído')
     cacheDelete(CK.mes(ano.value, mes.value))
     cacheDelete(CK.chart(ano.value))
+    cacheDelete(CK.lixeira)
     await Promise.all([loadMes(), loadChart()])
   }
 
@@ -242,6 +291,7 @@ export const useGastosStore = defineStore('gastos', () => {
     toast(`${n} lançamento${n !== 1 ? 's' : ''} movido${n !== 1 ? 's' : ''} para a lixeira`)
     cacheDelete(CK.mes(ano.value, mes.value))
     cacheDelete(CK.chart(ano.value))
+    cacheDelete(CK.lixeira)
     await Promise.all([loadMes(), loadChart()])
   }
 
@@ -312,7 +362,10 @@ export const useGastosStore = defineStore('gastos', () => {
 
   // ─── Lixeira ────────────────────────────────────────────────────
   async function loadLixeira() {
-    return await api('/api/lixeira')
+    if (cacheHas(CK.lixeira)) return cacheGet(CK.lixeira)
+    const data = await api('/api/lixeira')
+    cacheSet(CK.lixeira, data)
+    return data
   }
 
   async function restaurarLancamento(id) {
@@ -321,20 +374,23 @@ export const useGastosStore = defineStore('gastos', () => {
     cacheDelete(CK.anos)
     cacheDelete(CK.mes(ano.value, mes.value))
     cacheDelete(CK.chart(ano.value))
+    cacheDelete(CK.lixeira)
     await Promise.all([loadAnos(), loadMes(), loadChart()])
   }
 
   async function deletarPermanente(id) {
     await api(`/api/lixeira/${id}`, { method: 'DELETE' })
     toast('Excluído permanentemente')
+    cacheDelete(CK.lixeira)
   }
 
   async function esvaziarLixeira() {
     const data = await api('/api/lixeira', { method: 'DELETE' })
     toast(`Lixeira esvaziada (${data.removidos} item${data.removidos !== 1 ? 's' : ''})`)
+    cacheSet(CK.lixeira, { lixeira: [], total: 0 })
   }
 
-  // ─── Init ────────────────────────────────────────────────────────
+  // ─── Init (fallback quando bootstrap não rodou) ───────────────────
   async function init() {
     await Promise.all([
       loadSecoes().catch((e) => console.error('[gastos] loadSecoes', e)),
@@ -346,13 +402,15 @@ export const useGastosStore = defineStore('gastos', () => {
       loadMes().catch((e) => console.error('[gastos] loadMes', e)),
       loadChart().catch((e) => console.error('[gastos] loadChart', e)),
     ])
+    loaded.value = true
   }
 
   return {
     ano, mes, secoes, allTags, mesesRevisados,
-    despesasSecoes, receitasSecoes, totaisMes, anos, chartData,
+    despesasSecoes, receitasSecoes, totaisMes, anos, chartData, loaded,
     totaisComputados, totalPagoDespesas, totalInvestidoReceitas, totalPendenteDespesas,
     findReceitaItem, findDespesaItem,
+    applyFromCache, reset,
     loadSecoes, loadAnos, loadTags, loadMesesRevisados,
     toggleMesRevisado, loadMes, loadChart,
     togglePago, toggleInvestido,

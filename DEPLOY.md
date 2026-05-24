@@ -191,16 +191,19 @@ Conteúdo do arquivo:
 ```ini
 [Unit]
 Description=Monesy — Flask App
-After=network.target mysql.service
+After=network.target
 
 [Service]
 User=monesy
 Group=www-data
 WorkingDirectory=/home/monesy/monesy
 EnvironmentFile=/home/monesy/monesy/.env
+# Cria /run/monesy/ com dono monesy (evita "Permission denied" no socket)
+RuntimeDirectory=monesy
+RuntimeDirectoryMode=0755
 ExecStart=/home/monesy/monesy/.venv/bin/gunicorn \
     --workers 2 \
-    --bind unix:/run/monesy.sock \
+    --bind unix:/run/monesy/monesy.sock \
     --access-logfile /var/log/monesy/access.log \
     --error-logfile /var/log/monesy/error.log \
     --timeout 60 \
@@ -211,6 +214,10 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 ```
+
+> **Nginx:** use `proxy_pass http://unix:/run/monesy/monesy.sock;` (não `/run/monesy.sock`).
+>
+> **MySQL remoto (Hostinger):** não use `After=mysql.service` — o MySQL não roda neste VPS.
 
 ```bash
 # Criar pasta de logs
@@ -246,8 +253,15 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
+    # Let's Encrypt (antes de location /)
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        default_type "text/plain";
+        try_files $uri =404;
+    }
+
     location / {
-        proxy_pass http://unix:/run/monesy.sock;
+        proxy_pass http://unix:/run/monesy/monesy.sock;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -257,7 +271,7 @@ server {
 
     # Cache para assets estáticos do Vue (hash no nome = imutáveis)
     location ~* \.(js|css|woff2?|ttf|eot|svg|png|ico|webp)$ {
-        proxy_pass http://unix:/run/monesy.sock;
+        proxy_pass http://unix:/run/monesy/monesy.sock;
         proxy_set_header Host $host;
         proxy_cache_bypass $http_pragma;
         expires 1y;
@@ -536,6 +550,8 @@ Se estiver migrando do modo JSON:
 
 ## 7. Atualizações (rollout)
 
+Guia detalhado: [ATUALIZACAO.md](ATUALIZACAO.md)
+
 ### VPS (Hostinger)
 
 ```bash
@@ -568,23 +584,42 @@ git push origin main
 
 ## 8. Resolução de problemas
 
-### App não inicia no VPS
+### `monesy` não fica `active (running)` (exit-code / auto-restart)
 
 ```bash
-# Ver logs do Gunicorn
-sudo journalctl -u monesy -n 50 --no-pager
+sudo journalctl -u monesy -n 40 --no-pager
+sudo tail -30 /var/log/monesy/error.log
+```
 
-# Testar manualmente
-cd /home/monesy/monesy
-source .venv/bin/activate
-python3 app.py   # rodar diretamente para ver erros
+**Causas frequentes:**
+
+| Sintoma no log | Correção |
+|----------------|----------|
+| `gunicorn: command not found` | `source .venv/bin/activate && pip install gunicorn` |
+| `Permission denied` em `/run/...` | Use `RuntimeDirectory=monesy` e socket `unix:/run/monesy/monesy.sock` (ver 2.9) |
+| `No such file` em `error.log` | `sudo mkdir -p /var/log/monesy && sudo chown monesy:www-data /var/log/monesy` |
+| `JWT_SECRET_KEY nao definido` | Preencha `.env` (modo MySQL) |
+| `frontend/dist` ausente | `cd frontend && npm run build` |
+
+Teste manual (como usuário `monesy`):
+
+```bash
+sudo -u monesy -i
+cd ~/monesy && source .venv/bin/activate
+pip install gunicorn
+python -c "import app; print('OK')"
+gunicorn --workers 1 --bind 0.0.0.0:5001 app:app
+# Se subir, Ctrl+C e corrija o unit systemd; depois:
+exit
+sudo systemctl daemon-reload
+sudo systemctl restart monesy
 ```
 
 ### Erro 502 Bad Gateway no Nginx
 
 ```bash
 # Verificar se o socket existe
-ls -la /run/monesy.sock
+ls -la /run/monesy/monesy.sock
 
 # Verificar logs do Nginx
 sudo tail -f /var/log/nginx/error.log

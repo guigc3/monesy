@@ -79,6 +79,7 @@
 import { ref } from 'vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import { useGastosStore } from '@/stores/gastos'
+import { CK, cacheGet, cacheHas } from '@/services/api'
 import { useToast } from '@/composables/useToast'
 import { fmtBRL, fmtTs } from '@/utils/format'
 import { mi, MI } from '@/utils/icons'
@@ -95,6 +96,10 @@ const miRestore = `${mi(MI.restore, 'mi-inline')} Restaurar`
 const miDelete  = mi(MI.delete, 'mi-btn')
 
 async function load() {
+  if (cacheHas(CK.lixeira)) {
+    items.value = cacheGet(CK.lixeira).lixeira || []
+    return
+  }
   loading.value = true
   error.value = ''
   try {
@@ -134,7 +139,7 @@ async function deletarPermanente(id) {
   if (!confirm('Excluir permanentemente? Esta ação não pode ser desfeita.')) return
   try {
     await gastosStore.deletarPermanente(id)
-    await load()
+    items.value = items.value.filter((i) => i.id !== id)
   } catch (err) {
     toast(err.message, true)
   }

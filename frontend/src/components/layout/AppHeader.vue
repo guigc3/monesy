@@ -186,7 +186,7 @@ async function handleFileChange(e) {
 
 async function logout() {
   const backend = authStore.config?.backend
-  if (backend === 'mysql') authStore.mysqlLogout()
+  if (backend === 'mysql') await authStore.mysqlLogout()
   else if (backend === 'supabase') await authStore.supabaseLogout()
 }
 

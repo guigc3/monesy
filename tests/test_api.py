@@ -372,6 +372,34 @@ class TestAuthEConfig:
         assert body["backend"] == "json"
         assert body["supabase"] is None
 
+    def test_bootstrap_agrega_dados_do_usuario(self, gastos_client):
+        gastos_client.post("/api/anos", json={"ano": 2026})
+        gastos_client.post(
+            "/api/lancamentos",
+            json={
+                "ano": 2026,
+                "mes": 5,
+                "tipo": "despesa",
+                "descricao": "Teste bootstrap",
+                "valor": 100,
+                "secao": "Despesas fixas",
+                "pago": True,
+            },
+        )
+        r = gastos_client.get("/api/bootstrap")
+        assert r.status_code == 200
+        body = r.get_json()
+        assert 2026 in body["anos"]
+        assert "2026:5" in body["resumos_mes"]
+        assert body["resumos_mes"]["2026:5"]["totais"]["saida_paga"] == 100
+        assert "2026" in body["charts"]
+        assert "secoes" in body
+        assert "tags" in body
+        assert "lixeira" in body
+        assert "assinaturas" in body
+        assert "features" in body
+        assert "2026" in body["meses_revisados"]
+
     def test_modo_supabase_bloqueia_sem_token(self, gastos_client, monkeypatch):
         monkeypatch.setenv("STORAGE_BACKEND", "supabase")
         monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")

@@ -5,6 +5,7 @@
  */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { loadUserData, clearUserDataCache } from '@/services/bootstrap'
 
 const MYSQL_TOKEN_KEY = 'monesy_jwt'
 const MYSQL_USER_KEY = 'monesy_user_id'
@@ -24,6 +25,43 @@ export const useAuthStore = defineStore('auth', () => {
   const supabaseClient = ref(null)
   const supabaseSession = ref(null)
 
+  // ─── Bootstrap sync ─────────────────────────────────────────────
+  async function _syncStoresFromCache() {
+    const [
+      { useGastosStore },
+      { useAssinaturasStore },
+      { useFeaturesStore },
+    ] = await Promise.all([
+      import('@/stores/gastos'),
+      import('@/stores/assinaturas'),
+      import('@/stores/features'),
+    ])
+    useGastosStore().applyFromCache()
+    useAssinaturasStore().applyFromCache()
+    useFeaturesStore().applyFromCache()
+  }
+
+  async function _bootstrapUser() {
+    await loadUserData()
+    await _syncStoresFromCache()
+  }
+
+  async function clearUserData() {
+    clearUserDataCache()
+    const [
+      { useGastosStore },
+      { useAssinaturasStore },
+      { useFeaturesStore },
+    ] = await Promise.all([
+      import('@/stores/gastos'),
+      import('@/stores/assinaturas'),
+      import('@/stores/features'),
+    ])
+    useGastosStore().reset()
+    useAssinaturasStore().reset()
+    useFeaturesStore().reset()
+  }
+
   // ─── Public API (mesmo contrato que window.AppAuth) ─────────────
   function getAccessToken() {
     if (mysqlToken.value) return mysqlToken.value
@@ -38,12 +76,14 @@ export const useAuthStore = defineStore('auth', () => {
   async function handleUnauthorized() {
     if (mysqlToken.value) {
       _mysqlClearSession()
+      await clearUserData()
       showOverlay.value = true
       return
     }
     if (supabaseClient.value) {
       await supabaseClient.value.auth.signOut()
       supabaseSession.value = null
+      await clearUserData()
       showOverlay.value = true
     }
   }
@@ -79,21 +119,23 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Falha na autenticação')
     _mysqlSaveSession(data.token, data.user_id)
-    _applyMysqlSession(true)
+    await _bootstrapUser()
+    await _applyMysqlSession(true)
   }
 
-  function _applyMysqlSession(hasSession) {
-    // Sempre marca como pronto (skeleton sai independente de autenticação)
+  async function _applyMysqlSession(hasSession) {
     if (!ready.value) ready.value = true
     if (hasSession) {
       showOverlay.value = false
     } else {
       showOverlay.value = true
+      await clearUserData()
     }
   }
 
-  function mysqlLogout() {
+  async function mysqlLogout() {
     _mysqlClearSession()
+    await clearUserData()
     showOverlay.value = true
   }
 
@@ -101,19 +143,15 @@ export const useAuthStore = defineStore('auth', () => {
     _mysqlLoadSession()
     if (mysqlToken.value) {
       try {
-        const res = await fetch('/api/anos', {
-          headers: { Authorization: `Bearer ${mysqlToken.value}` },
-        })
-        if (res.ok) {
-          _applyMysqlSession(true)
-          return
-        }
+        await _bootstrapUser()
+        await _applyMysqlSession(true)
+        return
       } catch (_) {
-        /* ignora */
+        /* sessão inválida ou bootstrap falhou */
       }
       _mysqlClearSession()
     }
-    _applyMysqlSession(false)
+    await _applyMysqlSession(false)
   }
 
   // ─── Supabase ───────────────────────────────────────────────────
@@ -144,8 +182,14 @@ export const useAuthStore = defineStore('auth', () => {
     supabaseSession.value = session || null
     if (!ready.value) ready.value = true
     if (session) {
+      try {
+        await _bootstrapUser()
+      } catch (err) {
+        console.error('[auth] bootstrap falhou', err)
+      }
       showOverlay.value = false
     } else {
+      await clearUserData()
       showOverlay.value = true
     }
   }
@@ -154,6 +198,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!supabaseClient.value) return
     await supabaseClient.value.auth.signOut()
     supabaseSession.value = null
+    await clearUserData()
     showOverlay.value = true
   }
 
@@ -207,7 +252,12 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    // Modo json — sem login
+    // Modo json — sem login; carrega dados do usuário dev
+    try {
+      await _bootstrapUser()
+    } catch (err) {
+      console.error('[auth] bootstrap falhou', err)
+    }
     ready.value = true
   }
 

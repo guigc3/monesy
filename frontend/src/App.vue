@@ -53,8 +53,8 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { RouterLink, RouterView } from 'vue-router'
 import AppSkeleton from '@/components/layout/AppSkeleton.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AuthOverlay from '@/components/auth/AuthOverlay.vue'
@@ -74,7 +74,6 @@ const tabs = [
   { to: '/features',     name: 'features',     label: 'Features' },
 ]
 
-// Delegate header events to the currently rendered view
 function onNovoLancamento() {
   currentView.value?.openModalNovo?.()
 }
@@ -92,25 +91,9 @@ function onNovaAssinatura() {
 }
 
 onMounted(async () => {
-  // 1. Inicializa auth (detecta backend, valida token)
   await authStore.init()
-
-  // 2. Se autenticado, carrega os dados de gastos
-  if (authStore.ready && !authStore.showOverlay) {
+  if (authStore.ready && !authStore.showOverlay && !gastosStore.loaded) {
     await gastosStore.init()
   }
-
-  // 3. Quando auth sair do showOverlay (após login), carrega dados
-  // (watch é necessário para mysql/supabase)
 })
-
-// Carrega dados após login bem-sucedido
-watch(
-  () => authStore.showOverlay,
-  async (nowHidden) => {
-    if (!nowHidden && authStore.ready) {
-      await gastosStore.init()
-    }
-  }
-)
 </script>

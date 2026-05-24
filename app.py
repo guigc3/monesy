@@ -319,6 +319,131 @@ def public_config():
     return jsonify({"backend": "json", "supabase": None})
 
 
+def _lixeira_item(lanc):
+    return {
+        "id": lanc["id"],
+        "ano": lanc.get("ano"),
+        "mes": lanc.get("mes"),
+        "mes_nome": MESES[lanc["mes"] - 1] if lanc.get("mes") and 1 <= lanc["mes"] <= 12 else "",
+        "tipo": lanc.get("tipo"),
+        "descricao": _descricao(lanc),
+        "valor": lanc.get("valor"),
+        "secao": lanc.get("secao"),
+        "excluido_em": lanc.get("excluido_em"),
+    }
+
+
+def _resumo_mes_payload(ano, mes, lancs, secoes_despesa, secoes_receita):
+    receitas_secoes, despesas_secoes = _group_lancs_into_secoes(
+        secoes_despesa, secoes_receita, lancs,
+    )
+    totais = _totais_lancs(lancs)
+    receitas_flat = [item for s in receitas_secoes for item in s["itens"]]
+    return {
+        "ano": ano,
+        "mes": mes,
+        "mes_nome": MESES[mes - 1] if 1 <= mes <= 12 else "",
+        "totais": totais,
+        "receitas": receitas_flat,
+        "receitas_por_secao": receitas_secoes,
+        "despesas_por_secao": despesas_secoes,
+    }
+
+
+def _chart_ano_payload(ano, lancs_ano):
+    by_mes = defaultdict(list)
+    for l in lancs_ano:
+        by_mes[l.get("mes")].append(l)
+    mensal = []
+    for m in range(1, 13):
+        totais = _totais_lancs(by_mes.get(m, []))
+        mensal.append({"mes": m, "mes_nome": MESES[m - 1], **totais})
+    totais_ano = _totais_lancs(lancs_ano)
+    por_descricao = defaultdict(lambda: {"receita": 0.0, "despesa": 0.0})
+    for lanc in lancs_ano:
+        nome = _descricao(lanc)
+        por_descricao[nome][lanc["tipo"]] += lanc.get("valor", 0)
+    ranking_despesas = sorted(
+        [
+            {"descricao": nome, "total": round(vals["despesa"], 2)}
+            for nome, vals in por_descricao.items()
+            if vals["despesa"] > 0
+        ],
+        key=lambda x: x["total"],
+        reverse=True,
+    )[:10]
+    return {
+        "ano": ano,
+        "totais_ano": totais_ano,
+        "mensal": mensal,
+        "ranking_despesas": ranking_despesas,
+    }
+
+
+def _build_bootstrap(user_id):
+    repo = get_repository()
+    secoes_data = repo.list_secoes(user_id)
+    secoes_despesa = secoes_data.get("despesa") or list(DEFAULT_SECOES)
+    secoes_receita = secoes_data.get("receita") or list(DEFAULT_SECOES_RECEITA)
+    secoes = {"despesa": secoes_despesa, "receita": secoes_receita}
+
+    tags = repo.list_tags(user_id)
+    anos = repo.list_anos(user_id)
+    if not anos:
+        anos = [datetime.now().year]
+
+    meses_revisados = {}
+    resumos_mes = {}
+    charts = {}
+    for ano in anos:
+        meses_revisados[str(ano)] = repo.list_meses_revisados(user_id, ano)
+        lancs_ano = repo.list_lancamentos(user_id, ano, with_ultima_alteracao=True)
+        by_mes = defaultdict(list)
+        for l in lancs_ano:
+            by_mes[l.get("mes")].append(l)
+        charts[str(ano)] = _chart_ano_payload(ano, lancs_ano)
+        for m in range(1, 13):
+            resumos_mes[f"{ano}:{m}"] = _resumo_mes_payload(
+                ano, m, by_mes.get(m, []), secoes_despesa, secoes_receita,
+            )
+
+    lixeira = [_lixeira_item(lanc) for lanc in repo.list_lixeira(user_id)]
+
+    assin_items = repo.list_assinaturas(user_id)
+    assin_items.sort(
+        key=lambda a: ((a.get("cartao") or "").lower(), (a.get("descricao") or "").lower())
+    )
+    enriched = [_enrich_assinatura(a) for a in assin_items]
+    total_mensal_ativas = round(
+        sum(float(a.get("valor_mensal") or 0) for a in enriched if a.get("ativa")), 2
+    )
+
+    features = repo.list_features()
+    features.sort(key=lambda x: x.get("implementado_em") or "", reverse=True)
+
+    return {
+        "secoes": secoes,
+        "tags": tags,
+        "anos": anos,
+        "meses_revisados": meses_revisados,
+        "resumos_mes": resumos_mes,
+        "charts": charts,
+        "lixeira": lixeira,
+        "assinaturas": {
+            "cartoes": repo.list_cartoes(user_id),
+            "assinaturas": enriched,
+            "total_mensal_ativas": total_mensal_ativas,
+        },
+        "features": features,
+    }
+
+
+@app.route("/api/bootstrap")
+@auth.require_auth
+def bootstrap():
+    return jsonify(_build_bootstrap(g.user_id))
+
+
 # ---------------------------------------------------------------------------
 # Auth MySQL (registro e login proprios)
 # ---------------------------------------------------------------------------
@@ -745,19 +870,7 @@ def delete_lancamento(lanc_id):
 @auth.require_auth
 def list_lixeira():
     items = get_repository().list_lixeira(g.user_id)
-    result = []
-    for lanc in items:
-        result.append({
-            "id": lanc["id"],
-            "ano": lanc.get("ano"),
-            "mes": lanc.get("mes"),
-            "mes_nome": MESES[lanc["mes"] - 1] if lanc.get("mes") and 1 <= lanc["mes"] <= 12 else "",
-            "tipo": lanc.get("tipo"),
-            "descricao": _descricao(lanc),
-            "valor": lanc.get("valor"),
-            "secao": lanc.get("secao"),
-            "excluido_em": lanc.get("excluido_em"),
-        })
+    result = [_lixeira_item(lanc) for lanc in items]
     return jsonify({"lixeira": result, "total": len(result)})
 
 

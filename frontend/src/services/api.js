@@ -18,6 +18,9 @@ export const CK = {
   tags: 'tags',
   anos: 'anos',
   mrev: (ano) => `mrev:${ano}`,
+  lixeira: 'lixeira',
+  assinaturas: 'assinaturas',
+  features: 'features',
 }
 
 export function bustPrefix(prefix) {
