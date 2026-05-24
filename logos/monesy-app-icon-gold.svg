@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Monesy · app icon</title>
+  <rect width="1024" height="1024" rx="224" fill="#C5A880"></rect>
+  <g transform="translate(192 192) scale(6.4)">
+    <rect x="14" y="22" width="16" height="56" rx="6" fill="#005A60"></rect>
+    <rect x="70" y="22" width="16" height="56" rx="6" fill="#005A60"></rect>
+    <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#005A60"></path>
+  </g>
+</svg>

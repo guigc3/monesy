@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 180" width="780" height="180">
+  <title>Monesy · lockup horizontal</title>
+  <defs>
+    
+  </defs>
+  <rect width="780" height="180" fill="#005A60"></rect>
+  <g transform="translate(10 30) scale(1.4)">
+    <rect x="14" y="22" width="16" height="56" rx="6" fill="#F2F3F5"></rect>
+    <rect x="70" y="22" width="16" height="56" rx="6" fill="#F2F3F5"></rect>
+    <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#C5A880"></path>
+  </g>
+  <text x="180" y="135" class="wm">monesy</text>
+</svg>

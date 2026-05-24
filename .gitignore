@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+.cursor/
+
+# Logs
+*.log
+.pytest_cache/
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# Variaveis de ambiente
+.env
+.env.local
+.env.*.local

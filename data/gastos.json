@@ -1,0 +1,550 @@
+{
+  "secoes_despesa": [
+    "Despesas fixas",
+    "Moradia",
+    "Cartões",
+    "Bancos",
+    "Outros"
+  ],
+  "secoes_receita": [
+    "Receitas",
+    "Salários",
+    "Outras receitas"
+  ],
+  "anos": [
+    2026,
+    2027
+  ],
+  "lancamentos": [
+    {
+      "id": "676fc8e5-0090-4b03-8409-6f210632ef23",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 5000.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:17"
+    },
+    {
+      "id": "9666d49d-fc98-4426-b5b9-c01f661fb893",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 100.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:17"
+    },
+    {
+      "id": "eb70dfb6-42ed-4f6d-9c31-a7f9f1995bf6",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "despesa",
+      "descricao": "Condomínio",
+      "secao": "Despesas fixas",
+      "valor": 850.0,
+      "observacao": "vencimento dia 10",
+      "tags": [
+        "casa",
+        "fixo"
+      ],
+      "criado_em": "2026-05-23T16:11:17"
+    },
+    {
+      "id": "b18b5ad3-340e-4240-9963-74c1e6e92246",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "despesa",
+      "descricao": "Cartão Nubank",
+      "secao": "Cartões",
+      "valor": 1200.0,
+      "observacao": "",
+      "tags": [
+        "cartao"
+      ],
+      "criado_em": "2026-05-23T16:11:17"
+    },
+    {
+      "id": "d2cd79ce-28a8-4ee9-be1d-cb528fb7ae00",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 5000.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "43001278-8cac-48c9-a5ee-bd33f6a9a7b3",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 100.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "be7f425f-0467-4361-87d9-1ae14b1bc11a",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "despesa",
+      "descricao": "Condomínio",
+      "secao": "Despesas fixas",
+      "valor": 850.0,
+      "observacao": "vencimento dia 10",
+      "tags": [
+        "casa",
+        "fixo"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "95359a9a-21f7-4bb2-8ae4-072c43518255",
+      "ano": 2026,
+      "mes": 1,
+      "tipo": "despesa",
+      "descricao": "Cartão Nubank",
+      "secao": "Cartões",
+      "valor": 1200.0,
+      "observacao": "",
+      "tags": [
+        "cartao"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "6d0ad1f1-53ef-4910-b702-6df439e23ff6",
+      "ano": 2026,
+      "mes": 2,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 5000.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "78b7669c-a6d0-4b47-b02a-33efd20af9f7",
+      "ano": 2026,
+      "mes": 2,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 100.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "cbee90c5-0137-4611-9637-5443920e0fec",
+      "ano": 2026,
+      "mes": 2,
+      "tipo": "despesa",
+      "descricao": "Condomínio",
+      "secao": "Despesas fixas",
+      "valor": 850.0,
+      "observacao": "vencimento dia 10",
+      "tags": [
+        "casa",
+        "fixo"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "9af1b096-4215-467d-8a78-1bfb18174b1d",
+      "ano": 2026,
+      "mes": 2,
+      "tipo": "despesa",
+      "descricao": "Cartão Nubank",
+      "secao": "Cartões",
+      "valor": 1200.0,
+      "observacao": "",
+      "tags": [
+        "cartao"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "84234e45-4797-4f36-b553-03d54896b338",
+      "ano": 2026,
+      "mes": 3,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 5000.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53",
+      "investido": false,
+      "historico": [
+        {
+          "ts": "2026-05-23T16:16:17",
+          "acao": "investido",
+          "antes": {
+            "investido": null
+          },
+          "depois": {
+            "investido": true
+          }
+        },
+        {
+          "ts": "2026-05-23T16:16:31",
+          "acao": "desinvestido",
+          "antes": {
+            "investido": true
+          },
+          "depois": {
+            "investido": false
+          }
+        },
+        {
+          "ts": "2026-05-23T16:16:31",
+          "acao": "investido",
+          "antes": {
+            "investido": false
+          },
+          "depois": {
+            "investido": true
+          }
+        },
+        {
+          "ts": "2026-05-23T16:16:32",
+          "acao": "desinvestido",
+          "antes": {
+            "investido": true
+          },
+          "depois": {
+            "investido": false
+          }
+        },
+        {
+          "ts": "2026-05-23T16:16:32",
+          "acao": "investido",
+          "antes": {
+            "investido": false
+          },
+          "depois": {
+            "investido": true
+          }
+        },
+        {
+          "ts": "2026-05-23T16:16:33",
+          "acao": "desinvestido",
+          "antes": {
+            "investido": true
+          },
+          "depois": {
+            "investido": false
+          }
+        },
+        {
+          "ts": "2026-05-23T16:16:41",
+          "acao": "investido",
+          "antes": {
+            "investido": false
+          },
+          "depois": {
+            "investido": true
+          }
+        },
+        {
+          "ts": "2026-05-23T16:16:44",
+          "acao": "desinvestido",
+          "antes": {
+            "investido": true
+          },
+          "depois": {
+            "investido": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "8321a8a2-1982-4523-a518-c8a4d9ce6d1b",
+      "ano": 2026,
+      "mes": 3,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 100.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "424aaeb4-c69b-4ef2-bdfd-18e215686bc0",
+      "ano": 2026,
+      "mes": 3,
+      "tipo": "despesa",
+      "descricao": "Condomínio",
+      "secao": "Despesas fixas",
+      "valor": 850.0,
+      "observacao": "vencimento dia 10",
+      "tags": [
+        "casa",
+        "fixo"
+      ],
+      "criado_em": "2026-05-23T16:11:53",
+      "pago": false,
+      "historico": [
+        {
+          "ts": "2026-05-23T16:14:25",
+          "acao": "pago",
+          "antes": {
+            "pago": null
+          },
+          "depois": {
+            "pago": true
+          }
+        },
+        {
+          "ts": "2026-05-23T16:15:55",
+          "acao": "despago",
+          "antes": {
+            "pago": true
+          },
+          "depois": {
+            "pago": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc059bf1-8736-4f6d-b948-f96bcf7b6c1a",
+      "ano": 2026,
+      "mes": 3,
+      "tipo": "despesa",
+      "descricao": "Cartão Nubank",
+      "secao": "Cartões",
+      "valor": 1200.0,
+      "observacao": "",
+      "tags": [
+        "cartao"
+      ],
+      "criado_em": "2026-05-23T16:11:53",
+      "pago": true,
+      "historico": [
+        {
+          "ts": "2026-05-23T16:14:43",
+          "acao": "pago",
+          "antes": {
+            "pago": null
+          },
+          "depois": {
+            "pago": true
+          }
+        },
+        {
+          "ts": "2026-05-23T16:15:00",
+          "acao": "despago",
+          "antes": {
+            "pago": true
+          },
+          "depois": {
+            "pago": false
+          }
+        },
+        {
+          "ts": "2026-05-23T16:15:54",
+          "acao": "pago",
+          "antes": {
+            "pago": false
+          },
+          "depois": {
+            "pago": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "666bc0d7-609e-4cbb-9bdd-3d5290606860",
+      "ano": 2026,
+      "mes": 4,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 5000.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "0f4a2ba9-0d4c-42ac-ba40-7a7b0ad329b1",
+      "ano": 2026,
+      "mes": 4,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 100.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "3373dee7-db56-465e-ab8f-35c0d89a01dd",
+      "ano": 2026,
+      "mes": 4,
+      "tipo": "despesa",
+      "descricao": "Condomínio",
+      "secao": "Despesas fixas",
+      "valor": 850.0,
+      "observacao": "vencimento dia 10",
+      "tags": [
+        "casa",
+        "fixo"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "175db0a3-fdcc-4751-a503-d5b4583cebd6",
+      "ano": 2026,
+      "mes": 4,
+      "tipo": "despesa",
+      "descricao": "Cartão Nubank",
+      "secao": "Cartões",
+      "valor": 1200.0,
+      "observacao": "",
+      "tags": [
+        "cartao"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "19a08cfd-47ed-45e4-a27b-b3621092723d",
+      "ano": 2026,
+      "mes": 5,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 100.0,
+      "observacao": "",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "2ebb1963-f9ab-4005-823f-cbfa866a799f",
+      "ano": 2026,
+      "mes": 5,
+      "tipo": "despesa",
+      "descricao": "Condomínio",
+      "secao": "Despesas fixas",
+      "valor": 850.0,
+      "observacao": "vencimento dia 10",
+      "tags": [
+        "casa",
+        "fixo"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "e1a23748-2a3d-469c-a6b7-b843cdac31f1",
+      "ano": 2026,
+      "mes": 5,
+      "tipo": "despesa",
+      "descricao": "Cartão Nubank",
+      "secao": "Cartões",
+      "valor": 1200.0,
+      "observacao": "",
+      "tags": [
+        "cartao"
+      ],
+      "criado_em": "2026-05-23T16:11:53"
+    },
+    {
+      "id": "c4c5793b-c804-41e2-9d79-1bf1346ffc8a",
+      "ano": 2026,
+      "mes": 5,
+      "tipo": "receita",
+      "descricao": "Salário",
+      "secao": "Receitas",
+      "valor": 5000.0,
+      "observacao": "MAYCON GOSTOSO",
+      "tags": [
+        "salario",
+        "mensal"
+      ],
+      "criado_em": "2026-05-23T16:11:53",
+      "historico": [
+        {
+          "ts": "2026-05-23T16:12:17",
+          "acao": "editado",
+          "antes": {
+            "observacao": ""
+          },
+          "depois": {
+            "observacao": "MAYCON GOSTOSO"
+          }
+        },
+        {
+          "ts": "2026-05-23T16:12:59",
+          "acao": "excluido",
+          "antes": {
+            "descricao": "Salário",
+            "valor": 5000.0,
+            "secao": "Receitas",
+            "observacao": "MAYCON GOSTOSO",
+            "tags": [
+              "salario",
+              "mensal"
+            ],
+            "pago": null,
+            "investido": null,
+            "tipo": "receita",
+            "mes": 5,
+            "ano": 2026
+          }
+        },
+        {
+          "ts": "2026-05-23T16:13:06",
+          "acao": "restaurado"
+        }
+      ]
+    }
+  ],
+  "lixeira": [],
+  "meses_revisados": []
+}
