@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 24px; }
+  .card-frame { width: 700px; box-sizing: border-box; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .demo { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .square {
+    width: 92px; height: 92px;
+    background: linear-gradient(135deg, var(--petrol) 0%, var(--petrol-deep) 100%);
+    box-shadow: 0 2px 8px var(--primary-glow);
+  }
+  .name { font-family: var(--font-mono); font-size: 10px; color: var(--gray); letter-spacing: 0.10em; text-transform: uppercase; }
+  .val { font-family: var(--font-mono); font-size: 11px; color: var(--ink); }
+  .pill {
+    width: 92px; height: 32px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 10px; color: var(--gray); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div class="demo">
+    <div class="square" style="border-radius:10px;"></div>
+    <div class="name">radius-sm</div><div class="val">10 px</div>
+  </div>
+  <div class="demo">
+    <div class="square" style="border-radius:12px;"></div>
+    <div class="name">radius</div><div class="val">12 px</div>
+  </div>
+  <div class="demo">
+    <div class="square" style="border-radius:16px;"></div>
+    <div class="name">radius-lg</div><div class="val">16 px</div>
+  </div>
+  <div class="demo">
+    <div class="pill">Badge</div>
+    <div class="name">radius-pill</div><div class="val">999 px</div>
+  </div>
+</div>
+</body>
+</html>

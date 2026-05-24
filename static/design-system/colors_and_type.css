@@ -1,0 +1,307 @@
+/* ═══════════════════════════════════════════════════════════
+   Monesy — Design System · Tokens
+   Source of truth: Manual da Marca v3.0 (Nordic Trust) +
+   monesy/static/style.css
+
+   Two themes: light (default) and [data-theme="dark"].
+   Sans: Alte Haas Grotesk (uploaded by brand team) — replaces
+   Space Grotesk substitute. Mono: JetBrains Mono (Google Fonts).
+   ═══════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Alte Haas Grotesk';
+  src: url('fonts/AlteHaasGroteskRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alte Haas Grotesk';
+  src: url('fonts/AlteHaasGroteskBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+/* Map 500 & 600 to Bold — Alte Haas only ships Regular + Bold.
+   Synthesis would look thinner; we prefer the real bold cut. */
+@font-face {
+  font-family: 'Alte Haas Grotesk';
+  src: url('fonts/AlteHaasGroteskBold.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alte Haas Grotesk';
+  src: url('fonts/AlteHaasGroteskBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+    /* ── Brand palette ─────────────────────────────────────── */
+    --ink:          #16191F;   /* Grafite Suave · text base   */
+    --petrol:       #00ACC1;   /* Nordic Teal · primary       */
+    --petrol-deep:  #006A75;   /* Teal Dark · headers, bg     */
+    --gold:         #D4AF37;   /* Champagne Gold · accent     */
+    --gold-deep:    #A88820;   /* Gold Deep · accent alt      */
+    --cream:        #F2F3F5;   /* Névoa · neutral surface     */
+    --paper:        #FAFAF9;   /* Papel Frio · primary surface*/
+    --gray:         #6B7280;   /* Cinza Frio · text secondary */
+    --line:         #DDE0E5;   /* Hairlines, dividers         */
+
+    /* ── Semantic surfaces & text ──────────────────────────── */
+    --bg:               var(--cream);
+    --surface:          var(--paper);
+    --surface-2:        var(--cream);
+    --surface-3:        #E8EAED;
+
+    --text-primary:     var(--ink);
+    --text-secondary:   #4B5060;
+    --text-muted:       var(--gray);
+    --text-faint:       #9CA3AF;
+
+    --border:           var(--line);
+    --border-soft:      rgba(22,25,31,0.07);
+
+    /* ── Primary + accent token aliases ────────────────────── */
+    --primary:          var(--petrol);
+    --primary-dark:     var(--petrol-deep);
+    --primary-glow:     rgba(0,172,193,0.28);
+    --primary-soft:     rgba(0,172,193,0.10);
+    --accent:           var(--gold);
+    --accent-dark:      var(--gold-deep);
+    --accent-glow:      rgba(212,175,55,0.28);
+    --accent-soft:      rgba(212,175,55,0.12);
+
+    /* ── Semantic status ───────────────────────────────────── */
+    --green:            #16a34a;
+    --green-light:      #22c55e;
+    --green-soft:       rgba(22,163,74,0.10);
+    --red:              #dc2626;
+    --red-light:        #ef4444;
+    --red-soft:         rgba(220,38,38,0.10);
+    --blue:             var(--petrol);
+    --blue-soft:        var(--primary-soft);
+
+    /* ── Shadow system ─────────────────────────────────────── */
+    --shadow-xs:        0 1px 3px  rgba(22,25,31,0.06);
+    --shadow-sm:        0 2px 8px  rgba(22,25,31,0.07);
+    --shadow:           0 4px 20px rgba(22,25,31,0.08);
+    --shadow-lg:        0 12px 40px rgba(22,25,31,0.12);
+
+    /* ── Radius scale ──────────────────────────────────────── */
+    --radius-sm:        10px;
+    --radius:           12px;
+    --radius-lg:        16px;
+    --radius-pill:      999px;
+
+    /* ── Spacing (4px base) ────────────────────────────────── */
+    --space-1:          4px;
+    --space-2:          8px;
+    --space-3:          12px;
+    --space-4:          16px;
+    --space-5:          20px;
+    --space-6:          24px;
+    --space-8:          32px;
+    --space-10:         40px;
+    --space-12:         48px;
+
+    /* ── Type families ─────────────────────────────────────── */
+    --font-sans:        'Alte Haas Grotesk', system-ui, -apple-system, sans-serif;
+    --font-mono:        'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* ── Type scale (semantic) ─────────────────────────────── */
+    /* Display — section openers, marketing */
+    --type-display-size:    72px;
+    --type-display-weight:  700;
+    --type-display-lh:      0.92;
+    --type-display-track:   -0.04em;
+
+    /* H1 — page titles */
+    --type-h1-size:         42px;
+    --type-h1-weight:       700;
+    --type-h1-lh:           1.0;
+    --type-h1-track:        -0.03em;
+
+    /* H2 — section titles */
+    --type-h2-size:         24px;
+    --type-h2-weight:       600;
+    --type-h2-lh:           1.15;
+    --type-h2-track:        -0.02em;
+
+    /* H3 — subsection */
+    --type-h3-size:         16px;
+    --type-h3-weight:       600;
+    --type-h3-lh:           1.2;
+    --type-h3-track:        -0.01em;
+
+    /* Body */
+    --type-body-size:       14px;
+    --type-body-weight:     400;
+    --type-body-lh:         1.5;
+
+    --type-body-sm-size:    13px;
+    --type-body-sm-lh:      1.45;
+
+    /* Eyebrow / label — JetBrains Mono uppercase */
+    --type-eyebrow-size:    11px;
+    --type-eyebrow-weight:  500;
+    --type-eyebrow-track:   0.12em;
+
+    /* Numeric · money — JetBrains Mono */
+    --type-mono-size:       14px;
+    --type-mono-weight:     500;
+    --type-money-size:      28px;
+    --type-money-weight:    500;
+
+    /* ── Component-level (used in app) ─────────────────────── */
+    --header-bg-from:       var(--petrol);
+    --header-bg-to:         var(--petrol-deep);
+    --header-text:          var(--cream);
+
+    --tab-active-bg:        linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    --tab-active-color:     var(--cream);
+    --tab-active-shadow:    0 3px 10px var(--primary-glow);
+
+    --row-hover:            #ECEEF1;
+    --modal-backdrop:       rgba(22,25,31,0.55);
+    --toast-bg:             var(--ink);
+    --toast-text:           var(--cream);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Dark mode — same brand DNA, deepened
+   ═══════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+    --bg:               #0E1117;
+    --surface:          var(--ink);
+    --surface-2:        #1E2329;
+    --surface-3:        #252A32;
+
+    --text-primary:     var(--cream);
+    --text-secondary:   rgba(242,243,245,0.72);
+    --text-muted:       var(--gray);
+    --text-faint:       #4B5060;
+
+    --border:           #2A3038;
+    --border-soft:      rgba(242,243,245,0.06);
+
+    --primary-soft:     rgba(0,172,193,0.14);
+    --primary-glow:     rgba(0,172,193,0.22);
+    --accent-soft:      rgba(212,175,55,0.14);
+    --accent-glow:      rgba(212,175,55,0.22);
+
+    --green:            #22c55e;
+    --red:              #ef4444;
+    --blue:             #33BDD4;
+
+    --shadow-xs:        0 1px 3px  rgba(0,0,0,0.30);
+    --shadow-sm:        0 2px 8px  rgba(0,0,0,0.35);
+    --shadow:           0 4px 20px rgba(0,0,0,0.40);
+    --shadow-lg:        0 12px 40px rgba(0,0,0,0.50);
+
+    --modal-backdrop:   rgba(4,5,8,0.72);
+    --toast-bg:         #252A32;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Semantic element styles
+   ═══════════════════════════════════════════════════════════ */
+body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+}
+
+.display, h1.display {
+    font-family: var(--font-sans);
+    font-size: var(--type-display-size);
+    font-weight: var(--type-display-weight);
+    line-height: var(--type-display-lh);
+    letter-spacing: var(--type-display-track);
+    color: var(--text-primary);
+}
+
+h1 {
+    font-family: var(--font-sans);
+    font-size: var(--type-h1-size);
+    font-weight: var(--type-h1-weight);
+    line-height: var(--type-h1-lh);
+    letter-spacing: var(--type-h1-track);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+h2 {
+    font-family: var(--font-sans);
+    font-size: var(--type-h2-size);
+    font-weight: var(--type-h2-weight);
+    line-height: var(--type-h2-lh);
+    letter-spacing: var(--type-h2-track);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+h3 {
+    font-family: var(--font-sans);
+    font-size: var(--type-h3-size);
+    font-weight: var(--type-h3-weight);
+    line-height: var(--type-h3-lh);
+    letter-spacing: var(--type-h3-track);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+p, li {
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.body-sm { font-size: var(--type-body-sm-size); line-height: var(--type-body-sm-lh); }
+.muted   { color: var(--text-muted); }
+
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--type-eyebrow-size);
+    font-weight: var(--type-eyebrow-weight);
+    letter-spacing: var(--type-eyebrow-track);
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.mono, code, .num {
+    font-family: var(--font-mono);
+    font-weight: var(--type-mono-weight);
+}
+
+.money {
+    font-family: var(--font-mono);
+    font-size: var(--type-money-size);
+    font-weight: var(--type-money-weight);
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+a {
+    color: var(--primary-dark);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+a:hover { color: var(--primary); }
+
+hr, .rule {
+    border: 0;
+    height: 1px;
+    background: var(--line);
+}

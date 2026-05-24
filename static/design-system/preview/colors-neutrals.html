@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 20px; }
+  .card-frame { width: 700px; box-sizing: border-box; }
+  .palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .swatch {
+    aspect-ratio: 1.5 / 1;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid transparent;
+  }
+  .swatch.bordered { border-color: var(--line); }
+  .swatch .name { font-family: var(--font-sans); font-weight: 600; font-size: 13px; letter-spacing: -0.01em; }
+  .swatch .role { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.10em; text-transform: uppercase; opacity: 0.65; margin-top: 2px; }
+  .swatch .hex { font-family: var(--font-mono); font-size: 10px; opacity: 0.78; }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div class="palette">
+    <div class="swatch" style="background:#16191F;color:#F2F3F5;">
+      <div><div class="role">Texto base</div><div class="name">Grafite Suave</div></div>
+      <div class="hex">#16191F</div>
+    </div>
+    <div class="swatch" style="background:#6B7280;color:#F2F3F5;">
+      <div><div class="role">Texto sec.</div><div class="name">Cinza Frio</div></div>
+      <div class="hex">#6B7280</div>
+    </div>
+    <div class="swatch bordered" style="background:#F2F3F5;color:#16191F;">
+      <div><div class="role">Surface</div><div class="name">Névoa</div></div>
+      <div class="hex">#F2F3F5</div>
+    </div>
+    <div class="swatch bordered" style="background:#FAFAF9;color:#16191F;">
+      <div><div class="role">Fundo</div><div class="name">Papel Frio</div></div>
+      <div class="hex">#FAFAF9</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

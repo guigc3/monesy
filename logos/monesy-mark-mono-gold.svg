@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
-  <title>Monesy · símbolo</title>
-
-  <rect x="14" y="22" width="16" height="56" rx="6" fill="#A0855A"></rect>
-  <rect x="70" y="22" width="16" height="56" rx="6" fill="#A0855A"></rect>
-  <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#A0855A"></path>
-</svg>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--cream); }
+  body { padding: 22px; }
+  .frame { width: 700px; box-sizing: border-box; }
+  .card-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .card {
+    aspect-ratio: 1.586 / 1;
+    border-radius: 16px;
+    padding: 18px;
+    color: var(--cream);
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 12px 24px rgba(0,106,117,0.22);
+  }
+  .card.front { background: linear-gradient(135deg, var(--petrol) 0%, var(--petrol-deep) 100%); }
+  .card.back  { background: var(--cream); color: var(--petrol-deep); box-shadow: 0 12px 24px rgba(22,25,31,0.10); border: 1px solid var(--line); }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .chip {
+    width: 30px; height: 22px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+    margin: 18px 0 14px;
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.05em;
+  }
+  .bot {
+    margin-top: auto;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    font-family: var(--font-sans);
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-mono {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .back-title {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-top: 6px;
+  }
+  .back-strip {
+    height: 26px; background: var(--petrol-deep);
+    margin: -18px -18px 12px;
+    border-radius: 16px 16px 0 0;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="card-pair">
+    <div class="card front">
+      <div class="top">
+        <svg viewBox="0 0 100 100" width="32" height="32">
+          <rect x="14" y="22" width="16" height="56" rx="6" fill="#F2F3F5"/>
+          <rect x="70" y="22" width="16" height="56" rx="6" fill="#F2F3F5"/>
+          <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#D4AF37"/>
+        </svg>
+        <span class="badge-mono">Débito</span>
+      </div>
+      <div class="chip"></div>
+      <div class="num">5412 ·· ·· 9087</div>
+      <div class="bot">
+        <span>CAMILA R. SOUZA</span>
+        <span class="badge-mono">04/29</span>
+      </div>
+    </div>
+    <div class="card back">
+      <div class="back-strip"></div>
+      <div class="back-title">Estabilidade nórdica,<br/>segurança transparente.</div>
+      <div class="bot">
+        <span class="badge-mono" style="color: var(--petrol-deep); opacity:1;">monesy.com.br</span>
+        <span class="badge-mono" style="color: var(--petrol-deep); opacity:1;">0800 591 0001</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

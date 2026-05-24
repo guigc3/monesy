@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 24px; }
+  .frame { width: 700px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .label-col { font-family: var(--font-mono); font-size: 10px; color: var(--gray); letter-spacing: 0.10em; text-transform: uppercase; min-width: 90px; }
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .b-ativa  { background: rgba(0,172,193,0.10); color: var(--petrol-deep); border: 1px solid rgba(0,172,193,0.22); }
+  .b-encerr { background: var(--cream); color: var(--gray); border: 1px solid var(--line); }
+  .b-pago   { background: rgba(0,172,193,0.10); color: var(--petrol-deep); border: 1px solid rgba(0,172,193,0.25); }
+  .b-invest { background: rgba(0,106,117,0.12); color: var(--petrol-deep); border: 1px solid rgba(0,106,117,0.28); }
+  .b-count  {
+    background: rgba(212,175,55,0.12); color: var(--gold-deep);
+    border: none; border-radius: 999px;
+    min-width: 36px; height: 24px; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .tag-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(0,172,193,0.10);
+    color: var(--petrol-deep);
+    border: 1px solid rgba(0,172,193,0.25);
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="row">
+    <span class="label-col">Status</span>
+    <span class="badge b-ativa">Ativa</span>
+    <span class="badge b-encerr">Encerrada</span>
+  </div>
+  <div class="row">
+    <span class="label-col">Lançamento</span>
+    <span class="badge b-pago">Total pago R$ 412</span>
+    <span class="badge b-invest">Investido R$ 320</span>
+  </div>
+  <div class="row">
+    <span class="label-col">Contador</span>
+    <span class="badge b-count">25</span>
+    <span class="badge b-count" style="background: rgba(0,172,193,0.10); color: var(--petrol-deep);">12</span>
+  </div>
+  <div class="row">
+    <span class="label-col">Tag chips</span>
+    <span class="tag-chip">fixo</span>
+    <span class="tag-chip">moradia</span>
+    <span class="tag-chip">cartão-nubank</span>
+  </div>
+</div>
+</body>
+</html>

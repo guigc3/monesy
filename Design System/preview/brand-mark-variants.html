@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 18px; }
+  .frame { width: 700px; box-sizing: border-box; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .tile {
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line);
+    position: relative;
+  }
+  .tile.cream { background: var(--cream); }
+  .tile.dark { background: var(--petrol-deep); border-color: transparent; }
+  .tile.gold { background: var(--gold); border-color: transparent; }
+  .tile.ink { background: var(--ink); border-color: transparent; }
+  .label {
+    position: absolute; bottom: 6px; left: 8px; right: 8px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--gray);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+  .tile.dark .label, .tile.ink .label { color: rgba(242,243,245,0.55); }
+  .tile.gold .label { color: var(--petrol-deep); }
+  img { width: 56%; height: auto; display: block; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="tile cream"><img src="../assets/logos/monesy-mark.svg" /><span class="label">01 · Primária</span></div>
+  <div class="tile dark"><img src="../assets/logos/monesy-mark-on-dark.svg" /><span class="label">02 · Sobre escuro</span></div>
+  <div class="tile gold"><img src="../assets/logos/monesy-mark-on-gold.svg" /><span class="label">03 · Sobre ouro</span></div>
+  <div class="tile cream"><img src="../assets/logos/monesy-mark-mono-graphite.svg" /><span class="label">04 · Mono grafite</span></div>
+  <div class="tile ink"><img src="../assets/logos/monesy-mark-mono-cream.svg" /><span class="label">05 · Mono névoa</span></div>
+  <div class="tile cream"><img src="../assets/logos/monesy-mark-mono-petrol.svg" /><span class="label">06 · Mono petróleo</span></div>
+</div>
+</body>
+</html>

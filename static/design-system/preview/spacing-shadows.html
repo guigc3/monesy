@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 32px 24px; }
+  .card-frame { width: 700px; box-sizing: border-box; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .demo { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .square {
+    width: 92px; height: 92px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .square.xs { box-shadow: 0 1px 3px rgba(22,25,31,0.06); }
+  .square.sm { box-shadow: 0 2px 8px rgba(22,25,31,0.07); }
+  .square.md { box-shadow: 0 4px 20px rgba(22,25,31,0.08); }
+  .square.lg { box-shadow: 0 12px 40px rgba(22,25,31,0.12); }
+  .square.glow { box-shadow: 0 2px 8px rgba(0,172,193,0.28); background: linear-gradient(135deg, var(--petrol), var(--petrol-deep)); border: none; }
+  .name { font-family: var(--font-mono); font-size: 10px; color: var(--gray); letter-spacing: 0.10em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div class="demo"><div class="square xs"></div><div class="name">shadow-xs</div></div>
+  <div class="demo"><div class="square sm"></div><div class="name">shadow-sm</div></div>
+  <div class="demo"><div class="square md"></div><div class="name">shadow</div></div>
+  <div class="demo"><div class="square lg"></div><div class="name">shadow-lg</div></div>
+</div>
+<div class="card-frame" style="margin-top:18px; grid-template-columns: repeat(2, 1fr);">
+  <div class="demo" style="flex-direction:row; gap:18px; justify-content:center;">
+    <div class="square glow"></div>
+    <div class="name" style="align-self:center;">primary-glow<br/>on primary btn</div>
+  </div>
+  <div class="demo" style="flex-direction:row; gap:18px; justify-content:center;">
+    <div class="square" style="background:var(--gold); border:none; box-shadow:0 4px 10px rgba(212,175,55,0.28);"></div>
+    <div class="name" style="align-self:center;">accent-glow<br/>premium / award</div>
+  </div>
+</div>
+</body>
+</html>

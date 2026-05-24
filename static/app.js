@@ -29,19 +29,39 @@ function _bustPrefix(prefix) {
     for (const k of _cache.keys()) if (k.startsWith(prefix)) _cache.delete(k);
 }
 
+function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 function applyTheme(dark) {
     state.darkMode = dark;
-    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    if (dark) {
+        document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+        document.documentElement.removeAttribute("data-theme");
+    }
     const btn = document.getElementById("btnTheme");
-    if (btn) btn.textContent = dark ? "☀️" : "🌙";
+    setThemeIcon(btn, dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
     if (state.chart) {
-        state.chart.options.plugins.legend.labels.color = dark ? "#9aa0b8" : "#555";
-        state.chart.options.scales.x.ticks.color = dark ? "#6b7280" : "#888";
-        state.chart.options.scales.y.ticks.color = dark ? "#6b7280" : "#aaa";
-        state.chart.options.scales.y.grid.color = dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
-        state.chart.update("none");
+        updateChartTheme(state.chart, dark);
     }
+}
+
+function updateChartTheme(chart, dark) {
+    const legendColor = dark ? cssVar("--text-secondary") : cssVar("--text-secondary");
+    chart.options.plugins.legend.labels.color = legendColor;
+    chart.options.scales.x.ticks.color = cssVar("--text-muted");
+    chart.options.scales.y.ticks.color = cssVar("--text-muted");
+    chart.options.scales.y.grid.color = dark
+        ? cssVar("--border-soft")
+        : "rgba(221,224,229,0.8)";
+    const tooltip = chart.options.plugins.tooltip;
+    tooltip.backgroundColor = dark ? "rgba(22, 25, 31, 0.94)" : "rgba(22, 25, 31, 0.96)";
+    tooltip.titleColor = cssVar("--gold");
+    tooltip.bodyColor = cssVar("--cream");
+    tooltip.borderColor = dark ? "rgba(212,175,55,0.22)" : "rgba(212,175,55,0.28)";
+    chart.update("none");
 }
 
 (function initTheme() {
@@ -263,7 +283,7 @@ function updateSecaoPagoBadge(secaoBlock, sec) {
             badge.className = "secao-pago-badge";
             right.insertBefore(badge, right.firstChild);
         }
-        badge.textContent = `✅ ${fmt.format(totalPago)} pago`;
+        badge.innerHTML = `${mi(MI.checkCircle, "mi-badge")} ${fmt.format(totalPago)} pago`;
     } else if (badge) {
         badge.remove();
     }
@@ -274,7 +294,7 @@ function updateDespesasPagoTotal() {
     if (!el) return;
     const total = totalPagoDespesas(state.despesasSecoes);
     if (total > 0) {
-        el.textContent = `✅ ${fmt.format(total)} pago`;
+        el.innerHTML = `${mi(MI.checkCircle, "mi-badge")} ${fmt.format(total)} pago`;
         el.classList.remove("hidden");
     } else {
         el.textContent = "";
@@ -310,7 +330,7 @@ function updateSecaoInvestBadge(secaoBlock, sec) {
             badge.className = "secao-invest-badge";
             right.insertBefore(badge, right.firstChild);
         }
-        badge.textContent = `📈 ${fmt.format(total)} investido`;
+        badge.innerHTML = `${mi(MI.trendingUp, "mi-badge")} ${fmt.format(total)} investido`;
     } else if (badge) {
         badge.remove();
     }
@@ -321,7 +341,7 @@ function updateReceitasInvestidoTotal() {
     if (!el) return;
     const total = totalInvestidoReceitas(state.receitasSecoes);
     if (total > 0) {
-        el.textContent = `📈 ${fmt.format(total)} investido`;
+        el.innerHTML = `${mi(MI.trendingUp, "mi-badge")} ${fmt.format(total)} investido`;
         el.classList.remove("hidden");
     } else {
         el.textContent = "";
@@ -346,18 +366,18 @@ function renderSecoes(containerId, secoes, tipo, emptyMsg) {
     const hasPagoCol = tipo === "despesa";
     const hasInvestCol = tipo === "receita";
     const checkTh = hasPagoCol
-        ? `<th class="col-check" title="Pago?">✓</th>`
+        ? `<th class="col-check" title="Pago?">${mi(MI.check, "mi-th")}</th>`
         : hasInvestCol
-            ? `<th class="col-check" title="Reserva / investimento imediato">📈</th>`
+            ? `<th class="col-check" title="Reserva / investimento imediato">${mi(MI.trendingUp, "mi-th")}</th>`
             : `<th class="col-check"></th>`;
     container.innerHTML = secoes.map((sec) => {
         const totalPago = hasPagoCol ? totalPagoSecao(sec) : 0;
         const totalInvest = hasInvestCol ? totalInvestidoSecao(sec) : 0;
         const pagoBadge = hasPagoCol && totalPago > 0
-            ? `<span class="secao-pago-badge">✅ ${fmt.format(totalPago)} pago</span>`
+            ? `<span class="secao-pago-badge">${mi(MI.checkCircle, "mi-badge")} ${fmt.format(totalPago)} pago</span>`
             : "";
         const investBadge = hasInvestCol && totalInvest > 0
-            ? `<span class="secao-invest-badge">📈 ${fmt.format(totalInvest)} investido</span>`
+            ? `<span class="secao-invest-badge">${mi(MI.trendingUp, "mi-badge")} ${fmt.format(totalInvest)} investido</span>`
             : "";
         return `
         <div class="secao-block" data-secao="${escapeHtml(sec.secao)}">
@@ -365,7 +385,7 @@ function renderSecoes(containerId, secoes, tipo, emptyMsg) {
                 <span>${escapeHtml(sec.secao)}</span>
                 <span class="secao-title-right">${pagoBadge}${investBadge}<span>${fmt.format(sec.total)}</span></span>
             </div>
-            <table>
+            <table class="responsive-table">
                 <thead><tr>${checkTh}<th>Descrição</th><th class="col-valor">Valor</th><th class="col-acoes">Ações</th></tr></thead>
                 <tbody>${sec.itens.map((item) => rowHtml(item, tipo)).join("")}</tbody>
             </table>
@@ -407,7 +427,11 @@ function rowHtml(item, tipo) {
     const pago = tipo === "despesa" && item.pago;
     const investido = tipo === "receita" && item.investido;
     const rowCls = pago ? " row-pago" : investido ? " row-investido" : "";
-    const emoji = pago ? '<span class="pago-emoji">✅</span> ' : investido ? '<span class="invest-emoji">📈</span> ' : "";
+    const statusIcon = pago
+        ? `<span class="pago-emoji">${mi(MI.checkCircle, "mi-row")}</span> `
+        : investido
+            ? `<span class="invest-emoji">${mi(MI.trendingUp, "mi-row")}</span> `
+            : "";
 
     let checkboxCol = `<td class="col-check"></td>`;
     if (tipo === "despesa") {
@@ -425,12 +449,12 @@ function rowHtml(item, tipo) {
         return `
         <tr data-id="${item.id}" data-valor="${item.valor}" class="row-lancamento${rowCls}">
             ${checkboxCol}
-            <td>${emoji}${escapeHtml(item.descricao || "")}${item.observacao ? `<br><small>${escapeHtml(item.observacao)}</small>` : ""}${ultimaAlt}${tagsBlock ? `<br>${tagsBlock}` : ""}</td>
-            <td class="col-valor ${cls}">${fmt.format(item.valor)}</td>
-            <td class="col-acoes">
-                <button type="button" class="btn btn-ghost btn-sm btn-hist" data-id="${item.id}" title="Histórico" aria-label="Histórico">📋</button>
-                <button type="button" class="btn btn-ghost btn-sm btn-edit" data-id="${item.id}" title="Editar" aria-label="Editar">✏️</button>
-                <button type="button" class="btn btn-danger btn-sm btn-del" data-id="${item.id}" title="Excluir" aria-label="Excluir">🗑</button>
+            <td data-label="Descrição">${statusIcon}${escapeHtml(item.descricao || "")}${item.observacao ? `<br><small>${escapeHtml(item.observacao)}</small>` : ""}${ultimaAlt}${tagsBlock ? `<br>${tagsBlock}` : ""}</td>
+            <td class="col-valor ${cls}" data-label="Valor">${fmt.format(item.valor)}</td>
+            <td class="col-acoes" data-label="Ações">
+                <button type="button" class="btn btn-ghost btn-sm btn-hist" data-id="${item.id}" title="Histórico" aria-label="Histórico">${mi(MI.history, "mi-btn")}</button>
+                <button type="button" class="btn btn-ghost btn-sm btn-edit" data-id="${item.id}" title="Editar" aria-label="Editar">${mi(MI.edit, "mi-btn")}</button>
+                <button type="button" class="btn btn-danger btn-sm btn-del" data-id="${item.id}" title="Excluir" aria-label="Excluir">${mi(MI.delete, "mi-btn")}</button>
             </td>
         </tr>
     `;
@@ -468,7 +492,7 @@ async function togglePago(id, pago) {
             if (descCell) {
                 if (pago) {
                     if (!descCell.querySelector(".pago-emoji")) {
-                        descCell.insertAdjacentHTML("afterbegin", '<span class="pago-emoji">✅</span> ');
+                        descCell.insertAdjacentHTML("afterbegin", `<span class="pago-emoji">${mi(MI.checkCircle, "mi-row")}</span> `);
                     }
                 } else {
                     const em = descCell.querySelector(".pago-emoji");
@@ -511,7 +535,7 @@ async function toggleInvestido(id, investido) {
             if (descCell) {
                 if (investido) {
                     if (!descCell.querySelector(".invest-emoji")) {
-                        descCell.insertAdjacentHTML("afterbegin", '<span class="invest-emoji">📈</span> ');
+                        descCell.insertAdjacentHTML("afterbegin", `<span class="invest-emoji">${mi(MI.trendingUp, "mi-row")}</span> `);
                     }
                 } else {
                     const em = descCell.querySelector(".invest-emoji");
@@ -621,7 +645,7 @@ function renderModalTags() {
     box.innerHTML = state.modalTags.map((tag, idx) => `
         <span class="tag-chip tag-chip-removable">
             ${escapeHtml(tag)}
-            <button type="button" class="tag-remove" data-idx="${idx}" aria-label="Remover tag">&times;</button>
+            <button type="button" class="tag-remove" data-idx="${idx}" aria-label="Remover tag">${mi(MI.close, "mi-tag-remove")}</button>
         </span>
     `).join("");
     box.querySelectorAll(".tag-remove").forEach((btn) => {
@@ -958,7 +982,7 @@ const hoverGuidePlugin = {
         const liquidoLabels = options?.liquidoLabels;
         if (Array.isArray(liquidoLabels) && liquidoLabels.length) {
             ctx.save();
-            ctx.font = "600 10.5px 'Segoe UI', sans-serif";
+            ctx.font = "500 10.5px 'JetBrains Mono', monospace";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             liquidoLabels.forEach((valor, i) => {
@@ -968,9 +992,9 @@ const hoverGuidePlugin = {
                 const label = liquidoLabels._fmt(valor);
                 const w = ctx.measureText(label).width + 10;
                 const h = 16;
-                const bg = valor >= 0 ? "rgba(39, 174, 96, 0.12)" : "rgba(231, 76, 60, 0.12)";
-                const border = valor >= 0 ? "rgba(39, 174, 96, 0.45)" : "rgba(231, 76, 60, 0.45)";
-                const color = valor >= 0 ? "#1e8449" : "#c0392b";
+                const bg = valor >= 0 ? "rgba(0, 172, 193, 0.12)" : "rgba(220, 38, 38, 0.12)";
+                const border = valor >= 0 ? "rgba(0, 172, 193, 0.45)" : "rgba(220, 38, 38, 0.45)";
+                const color = valor >= 0 ? cssVar("--petrol-deep") : cssVar("--red");
                 const r = 6;
                 ctx.beginPath();
                 ctx.moveTo(x - w / 2 + r, y - h / 2);
@@ -1071,10 +1095,16 @@ async function loadChart() {
     liquidoLabels._fmt = (v) => fmtCompact.format(v);
 
     const dark = state.darkMode;
-    const gridColor = dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
-    const tickColor = dark ? "#6b7280" : "#aaa";
-    const xTickColor = dark ? "#6b7280" : "#888";
-    const legendColor = dark ? "#9aa0b8" : "#555";
+    const gridColor = dark ? cssVar("--border-soft") : "rgba(221,224,229,0.8)";
+    const tickColor = cssVar("--text-muted");
+    const legendColor = cssVar("--text-secondary");
+    const petrol = cssVar("--petrol");
+    const red = cssVar("--red");
+    const gold = cssVar("--gold");
+    const pointBorder = cssVar("--surface-2");
+    const cream = cssVar("--cream");
+    const monoFont = cssVar("--font-mono");
+    const displayFont = cssVar("--font-sans");
 
     state.chart = new Chart(ctxEl, {
         type: "line",
@@ -1084,53 +1114,53 @@ async function loadChart() {
                 {
                     label: "Entrada",
                     data: entrada,
-                    borderColor: "#27ae60",
+                    borderColor: petrol,
                     backgroundColor: (ctx) => {
                         const { chart } = ctx;
-                        if (!chart.chartArea) return "rgba(39, 174, 96, 0.2)";
+                        if (!chart.chartArea) return "rgba(0, 172, 193, 0.15)";
                         return makeGradient(chart.ctx, chart.chartArea,
-                            "rgba(39, 174, 96, 0.35)", "rgba(39, 174, 96, 0.02)");
+                            "rgba(0, 172, 193, 0.28)", "rgba(0, 172, 193, 0.02)");
                     },
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 0,
                     pointHoverRadius: 6,
-                    pointHoverBackgroundColor: "#27ae60",
-                    pointHoverBorderColor: "#fff",
+                    pointHoverBackgroundColor: petrol,
+                    pointHoverBorderColor: pointBorder,
                     pointHoverBorderWidth: 2,
                     order: 3,
                 },
                 {
                     label: "Saída",
                     data: saida,
-                    borderColor: "#e74c3c",
+                    borderColor: red,
                     backgroundColor: (ctx) => {
                         const { chart } = ctx;
-                        if (!chart.chartArea) return "rgba(231, 76, 60, 0.18)";
+                        if (!chart.chartArea) return "rgba(220, 38, 38, 0.12)";
                         return makeGradient(chart.ctx, chart.chartArea,
-                            "rgba(231, 76, 60, 0.3)", "rgba(231, 76, 60, 0.02)");
+                            "rgba(220, 38, 38, 0.22)", "rgba(220, 38, 38, 0.02)");
                     },
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 0,
                     pointHoverRadius: 6,
-                    pointHoverBackgroundColor: "#e74c3c",
-                    pointHoverBorderColor: "#fff",
+                    pointHoverBackgroundColor: red,
+                    pointHoverBorderColor: pointBorder,
                     pointHoverBorderWidth: 2,
                     order: 2,
                 },
                 {
                     label: "Líquido",
                     data: liquido,
-                    borderColor: "#d49b3b",
+                    borderColor: gold,
                     backgroundColor: "transparent",
                     borderWidth: 3,
                     tension: 0.4,
                     fill: false,
-                    pointBackgroundColor: "#d49b3b",
-                    pointBorderColor: "#fff",
+                    pointBackgroundColor: gold,
+                    pointBorderColor: pointBorder,
                     pointBorderWidth: 2,
                     pointRadius: (ctx) => {
                         const v = ctx.parsed?.y ?? 0;
@@ -1158,24 +1188,24 @@ async function loadChart() {
                         boxWidth: 8,
                         boxHeight: 8,
                         padding: 18,
-                        font: { size: 12, weight: "600", family: "'Inter', 'Segoe UI', sans-serif" },
+                        font: { size: 12, weight: "600", family: displayFont },
                         color: legendColor,
                     },
                 },
                 tooltip: {
                     enabled: true,
-                    backgroundColor: "rgba(13, 13, 13, 0.96)",
-                    titleColor: "#d49b3b",
-                    titleFont: { weight: "700", size: 13 },
+                    backgroundColor: "rgba(22, 25, 31, 0.96)",
+                    titleColor: gold,
+                    titleFont: { weight: "700", size: 13, family: displayFont },
                     titleMarginBottom: 8,
-                    bodyColor: "#fff",
-                    bodyFont: { size: 12 },
+                    bodyColor: cream,
+                    bodyFont: { size: 12, family: monoFont },
                     bodySpacing: 6,
                     padding: { x: 14, y: 12 },
                     cornerRadius: 10,
                     displayColors: true,
                     boxPadding: 6,
-                    borderColor: "rgba(212, 155, 59, 0.25)",
+                    borderColor: "rgba(212, 175, 55, 0.28)",
                     borderWidth: 1,
                     caretSize: 6,
                     callbacks: {
@@ -1187,7 +1217,7 @@ async function loadChart() {
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { color: xTickColor, font: { size: 11, weight: "600" }, padding: 6 },
+                    ticks: { color: tickColor, font: { size: 11, weight: "600", family: displayFont }, padding: 6 },
                     border: { display: false },
                 },
                 y: {
@@ -1195,7 +1225,7 @@ async function loadChart() {
                     grid: { color: gridColor, drawTicks: false, lineWidth: 1 },
                     ticks: {
                         color: tickColor,
-                        font: { size: 11 },
+                        font: { size: 10, family: monoFont },
                         padding: 10,
                         maxTicksLimit: 6,
                         callback: (v) => fmtCompact.format(v),
@@ -1206,6 +1236,7 @@ async function loadChart() {
         },
         plugins: [hoverGuidePlugin],
     });
+    updateChartTheme(state.chart, dark);
 }
 
 async function saveLancamento(ev) {
@@ -1261,14 +1292,14 @@ async function saveLancamento(ev) {
 
 // ── Histórico ────────────────────────────────────────────────────
 const ACAO_LABELS = {
-    criado:     { icon: "✨", label: "Criado" },
-    editado:    { icon: "✏️", label: "Editado" },
-    pago:       { icon: "✅", label: "Marcado como pago" },
-    despago:    { icon: "↩️", label: "Desmarcado como pago" },
-    investido:  { icon: "📈", label: "Marcado como investimento" },
-    desinvestido: { icon: "↩️", label: "Desmarcado como investimento" },
-    excluido:   { icon: "🗑", label: "Excluído" },
-    restaurado: { icon: "♻️", label: "Restaurado" },
+    criado:       { icon: MI.autoAwesome, label: "Criado" },
+    editado:      { icon: MI.edit, label: "Editado" },
+    pago:         { icon: MI.checkCircle, label: "Marcado como pago" },
+    despago:      { icon: MI.undo, label: "Desmarcado como pago" },
+    investido:    { icon: MI.trendingUp, label: "Marcado como investimento" },
+    desinvestido: { icon: MI.undo, label: "Desmarcado como investimento" },
+    excluido:     { icon: MI.delete, label: "Excluído" },
+    restaurado:   { icon: MI.restore, label: "Restaurado" },
 };
 
 const CAMPO_LABELS = {
@@ -1286,7 +1317,7 @@ function fmtHistoricoValor(campo, val) {
 }
 
 function renderHistoricoEntry(entry) {
-    const info = ACAO_LABELS[entry.acao] || { icon: "•", label: entry.acao };
+    const info = ACAO_LABELS[entry.acao] || { icon: "fiber_manual_record", label: entry.acao };
     const antes = entry.antes || {};
     const depois = entry.depois || {};
     const campos = new Set([...Object.keys(antes), ...Object.keys(depois)]);
@@ -1303,7 +1334,7 @@ function renderHistoricoEntry(entry) {
     return `
         <div class="hist-entry">
             <div class="hist-entry-header">
-                <span class="hist-acao-icon">${info.icon}</span>
+                <span class="hist-acao-icon">${mi(info.icon, "mi-hist")}</span>
                 <span class="hist-acao-label">${escapeHtml(info.label)}</span>
                 <span class="hist-ts">${fmtTs(entry.ts)}</span>
             </div>
@@ -1340,14 +1371,14 @@ function fmtLixeiraRow(item) {
     const excluido = fmtTs(item.excluido_em);
     return `
         <tr class="lixeira-row" data-id="${item.id}">
-            <td>${tipo}</td>
-            <td><strong>${escapeHtml(item.descricao)}</strong><br><small>${escapeHtml(item.secao || "")}</small></td>
-            <td class="col-valor">${fmt.format(item.valor)}</td>
-            <td><small>${escapeHtml(mes)}</small></td>
-            <td><small class="text-muted">${escapeHtml(excluido)}</small></td>
-            <td class="col-acoes" style="width:130px">
-                <button class="btn btn-ghost btn-sm btn-restaurar" data-id="${item.id}" title="Restaurar">♻️ Restaurar</button>
-                <button class="btn btn-danger btn-sm btn-del-permanente" data-id="${item.id}" title="Excluir permanentemente">🗑</button>
+            <td data-label="Tipo">${tipo}</td>
+            <td data-label="Descrição"><strong>${escapeHtml(item.descricao)}</strong><br><small>${escapeHtml(item.secao || "")}</small></td>
+            <td class="col-valor" data-label="Valor">${fmt.format(item.valor)}</td>
+            <td data-label="Período"><small>${escapeHtml(mes)}</small></td>
+            <td data-label="Excluído"><small class="text-muted">${escapeHtml(excluido)}</small></td>
+            <td class="col-acoes" data-label="Ações">
+                <button class="btn btn-ghost btn-sm btn-restaurar" data-id="${item.id}" title="Restaurar">${miWithText(MI.restore, "Restaurar", "mi-inline")}</button>
+                <button class="btn btn-danger btn-sm btn-del-permanente" data-id="${item.id}" title="Excluir permanentemente">${mi(MI.delete, "mi-btn")}</button>
             </td>
         </tr>`;
 }
@@ -1362,8 +1393,8 @@ async function loadLixeira() {
             return;
         }
         body.innerHTML = `
-            <div style="overflow-x:auto">
-                <table>
+            <div class="table-wrap">
+                <table class="responsive-table">
                     <thead><tr>
                         <th>Tipo</th><th>Descrição</th>
                         <th class="col-valor">Valor</th>
@@ -1411,6 +1442,7 @@ async function esvaziarLixeira() {
 }
 
 function bindEvents() {
+    initHeaderMenu();
     document.getElementById("anoSelect").addEventListener("change", async (e) => {
         state.ano = parseInt(e.target.value, 10);
         await loadMesesRevisados();
@@ -1514,6 +1546,39 @@ async function safeRun(fn, label) {
         console.error(`[gastos] Falha em ${label}:`, err);
         toast(`Falha em ${label}: ${err.message}`, true);
     }
+}
+
+function initHeaderMenu() {
+    const header = document.getElementById("appHeader");
+    const btn = document.getElementById("btnHeaderMenu");
+    if (!header || !btn) return;
+
+    const close = () => {
+        header.classList.remove("header-open");
+        btn.setAttribute("aria-expanded", "false");
+        btn.querySelector(".material-icons").textContent = "menu";
+    };
+
+    btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const open = header.classList.toggle("header-open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.querySelector(".material-icons").textContent = open ? "close" : "menu";
+    });
+
+    header.querySelectorAll(".header-buttons .btn").forEach((el) => {
+        el.addEventListener("click", close);
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!header.classList.contains("header-open")) return;
+        if (header.contains(e.target)) return;
+        close();
+    });
+
+    window.addEventListener("resize", () => {
+        if (window.matchMedia("(min-width: 900px)").matches) close();
+    });
 }
 
 async function init() {

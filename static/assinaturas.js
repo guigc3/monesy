@@ -82,16 +82,16 @@ function fmtAssinaturaRow(item) {
     const ultima = fmtTs(item.ultima_alteracao);
     return `
         <tr class="assinatura-row${rowClass}" data-id="${item.id}">
-            <td><strong>${escapeHtml(item.descricao)}</strong><br>${status}</td>
-            <td>${escapeHtml(item.cartao || "—")}</td>
-            <td class="col-valor">${fmt.format(item.valor_mensal)}</td>
-            <td><small>${fmtDataBr(item.data_inicio)}</small></td>
-            <td><small>${fmtDataBr(item.data_fim)}</small></td>
-            <td><small class="text-muted">${escapeHtml(ultima)}</small></td>
-            <td class="col-acoes">
-                <button type="button" class="btn btn-ghost btn-sm btn-assin-hist" data-id="${item.id}" title="Histórico">📋</button>
-                <button type="button" class="btn btn-ghost btn-sm btn-assin-edit" data-id="${item.id}" title="Editar">✏️</button>
-                <button type="button" class="btn btn-danger btn-sm btn-assin-del" data-id="${item.id}" title="Excluir">🗑</button>
+            <td data-label="Descrição"><strong>${escapeHtml(item.descricao)}</strong><br>${status}</td>
+            <td data-label="Cartão">${escapeHtml(item.cartao || "—")}</td>
+            <td class="col-valor" data-label="Valor/mês">${fmt.format(item.valor_mensal)}</td>
+            <td data-label="Início"><small>${fmtDataBr(item.data_inicio)}</small></td>
+            <td data-label="Fim"><small>${fmtDataBr(item.data_fim)}</small></td>
+            <td data-label="Alteração"><small class="text-muted">${escapeHtml(ultima)}</small></td>
+            <td class="col-acoes" data-label="Ações">
+                <button type="button" class="btn btn-ghost btn-sm btn-assin-hist" data-id="${item.id}" title="Histórico">${mi(MI.history, "mi-btn")}</button>
+                <button type="button" class="btn btn-ghost btn-sm btn-assin-edit" data-id="${item.id}" title="Editar">${mi(MI.edit, "mi-btn")}</button>
+                <button type="button" class="btn btn-danger btn-sm btn-assin-del" data-id="${item.id}" title="Excluir">${mi(MI.delete, "mi-btn")}</button>
             </td>
         </tr>`;
 }
@@ -126,7 +126,7 @@ function renderAssinaturasTable() {
     }
 
     wrap.innerHTML = `
-        <table>
+        <table class="responsive-table">
             <thead>
                 <tr>
                     <th>Descrição</th>

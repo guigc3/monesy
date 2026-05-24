@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--cream); }
+  body { padding: 28px; }
+  .frame { width: 700px; box-sizing: border-box; display: flex; gap: 22px; align-items: flex-end; justify-content: center; }
+  .icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .ai { display: grid; place-items: center; }
+  .ai svg, .ai img { display: block; }
+  .a-petrol { width: 88px; height: 88px; border-radius: 20px; background: var(--petrol); box-shadow: 0 6px 16px rgba(0,128,128,0.28); }
+  .a-ink    { width: 72px; height: 72px; border-radius: 16px; background: var(--ink); box-shadow: 0 6px 16px rgba(30,34,41,0.30); }
+  .a-gold   { width: 56px; height: 56px; border-radius: 12px; background: var(--gold); box-shadow: 0 4px 12px rgba(212,175,55,0.36); }
+  .caption {
+    font-family: var(--font-mono); font-size: 9px; color: var(--gray);
+    letter-spacing: 0.10em; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="icon-wrap">
+    <div class="ai a-petrol">
+      <svg viewBox="0 0 100 100" width="56" height="56">
+        <rect x="14" y="22" width="16" height="56" rx="6" fill="#F2F3F5"/>
+        <rect x="70" y="22" width="16" height="56" rx="6" fill="#F2F3F5"/>
+        <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#D4AF37"/>
+      </svg>
+    </div>
+    <span class="caption">Petróleo · padrão</span>
+  </div>
+  <div class="icon-wrap">
+    <div class="ai a-ink">
+      <svg viewBox="0 0 100 100" width="44" height="44">
+        <rect x="14" y="22" width="16" height="56" rx="6" fill="#F2F3F5"/>
+        <rect x="70" y="22" width="16" height="56" rx="6" fill="#F2F3F5"/>
+        <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#D4AF37"/>
+      </svg>
+    </div>
+    <span class="caption">Grafite · escuro</span>
+  </div>
+  <div class="icon-wrap">
+    <div class="ai a-gold">
+      <svg viewBox="0 0 100 100" width="36" height="36">
+        <rect x="14" y="22" width="16" height="56" rx="6" fill="#006A75"/>
+        <rect x="70" y="22" width="16" height="56" rx="6" fill="#006A75"/>
+        <path d="M 30 70 L 50 38 L 70 70 L 62 70 L 50 52 L 38 70 Z" fill="#006A75"/>
+      </svg>
+    </div>
+    <span class="caption">Ouro · premium</span>
+  </div>
+</div>
+</body>
+</html>

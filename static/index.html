@@ -2,12 +2,15 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Monesy · Finanças pessoais</title>
-    <link rel="icon" href="/logos/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/design-system/logos/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/design-system/ui_kits/web-app/app.css?v=ds6">
+    <link rel="stylesheet" href="/monesy-extensions.css?v=ds7">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <!-- supabase-js carregado condicionalmente: so necessario no modo supabase -->
     <script>
@@ -19,6 +22,7 @@
             }
         }).catch(()=>{});
     </script>
+    <script src="icons.js" defer></script>
     <script src="auth.js" defer></script>
     <script src="app.js" defer></script>
     <script src="tabs.js" defer></script>
@@ -27,16 +31,105 @@
 </head>
 <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Carregando aplicação">
-        <div class="app-loading-inner">
-            <span class="app-loading-logo">$</span>
-            <div class="app-loading-spinner" aria-hidden="true"></div>
-            <p class="app-loading-text">Carregando…</p>
+        <!-- Skeleton: header -->
+        <div class="sk-header">
+            <div class="sk-header-brand">
+                <div class="sk sk-logo-mark"></div>
+                <div class="sk-brand-text">
+                    <div class="sk sk-text-lg"></div>
+                    <div class="sk sk-text-sm"></div>
+                </div>
+            </div>
+            <div class="sk-header-actions">
+                <div class="sk sk-btn-hd"></div>
+                <div class="sk sk-btn-hd"></div>
+                <div class="sk sk-btn-hd-primary"></div>
+            </div>
+        </div>
+        <!-- Skeleton: nav tabs -->
+        <div class="sk-nav">
+            <div class="sk-nav-inner">
+                <div class="sk sk-nav-tab"></div>
+                <div class="sk sk-nav-tab sk-short"></div>
+                <div class="sk sk-nav-tab sk-shorter"></div>
+            </div>
+        </div>
+        <!-- Skeleton: page content -->
+        <div class="sk-page container">
+            <!-- Month tabs -->
+            <div class="sk-month-row">
+                <div class="sk sk-month-tab"></div><div class="sk sk-month-tab"></div>
+                <div class="sk sk-month-tab"></div><div class="sk sk-month-tab"></div>
+                <div class="sk sk-month-tab"></div><div class="sk sk-month-tab"></div>
+                <div class="sk sk-month-tab"></div><div class="sk sk-month-tab"></div>
+                <div class="sk sk-month-tab"></div><div class="sk sk-month-tab"></div>
+                <div class="sk sk-month-tab"></div><div class="sk sk-month-tab"></div>
+            </div>
+            <!-- Summary cards -->
+            <div class="sk-cards-row">
+                <div class="sk-card-sk"><div class="sk sk-card-lbl"></div><div class="sk sk-card-val"></div></div>
+                <div class="sk-card-sk"><div class="sk sk-card-lbl"></div><div class="sk sk-card-val"></div></div>
+                <div class="sk-card-sk"><div class="sk sk-card-lbl"></div><div class="sk sk-card-hint"></div><div class="sk sk-card-val sk-card-val-lg"></div></div>
+                <div class="sk-card-sk"><div class="sk sk-card-lbl"></div><div class="sk sk-card-val"></div></div>
+                <div class="sk-card-sk"><div class="sk sk-card-lbl"></div><div class="sk sk-card-hint"></div><div class="sk sk-card-val"></div></div>
+            </div>
+            <!-- Chart panel -->
+            <div class="sk-chart-panel">
+                <div class="sk-chart-hd">
+                    <div class="sk-chart-hd-left">
+                        <div class="sk sk-eyebrow"></div>
+                        <div class="sk sk-panel-title"></div>
+                    </div>
+                    <div class="sk-chart-highlights">
+                        <div class="sk sk-highlight-pill"></div>
+                        <div class="sk sk-highlight-pill"></div>
+                        <div class="sk sk-highlight-pill"></div>
+                    </div>
+                </div>
+                <div class="sk sk-chart-body"></div>
+            </div>
+            <!-- Lancamentos panels -->
+            <div class="sk-panels-grid">
+                <div class="sk-panel">
+                    <div class="sk-panel-hd">
+                        <div class="sk-panel-hd-left">
+                            <div class="sk sk-eyebrow"></div>
+                            <div class="sk sk-panel-title"></div>
+                        </div>
+                        <div class="sk sk-add-btn"></div>
+                    </div>
+                    <div class="sk-panel-rows">
+                        <div class="sk-secao-title-sk"><div class="sk sk-secao-lbl"></div><div class="sk sk-secao-val"></div></div>
+                        <div class="sk-row"><div class="sk sk-check"></div><div class="sk-row-desc"><div class="sk sk-row-name"></div><div class="sk sk-row-date"></div><div class="sk sk-row-tags"></div></div><div class="sk sk-row-valor"></div><div class="sk sk-row-acoes"></div></div>
+                        <div class="sk-row"><div class="sk sk-check"></div><div class="sk-row-desc"><div class="sk sk-row-name sk-w55"></div><div class="sk sk-row-date sk-w45"></div><div class="sk sk-row-tags sk-w35"></div></div><div class="sk sk-row-valor"></div><div class="sk sk-row-acoes"></div></div>
+                        <div class="sk-row"><div class="sk sk-check"></div><div class="sk-row-desc"><div class="sk sk-row-name sk-w70"></div><div class="sk sk-row-date sk-w40"></div></div><div class="sk sk-row-valor"></div><div class="sk sk-row-acoes"></div></div>
+                    </div>
+                </div>
+                <div class="sk-panel">
+                    <div class="sk-panel-hd">
+                        <div class="sk-panel-hd-left">
+                            <div class="sk sk-eyebrow"></div>
+                            <div class="sk sk-panel-title"></div>
+                        </div>
+                        <div class="sk sk-add-btn"></div>
+                    </div>
+                    <div class="sk-panel-rows">
+                        <div class="sk-secao-title-sk"><div class="sk sk-secao-lbl"></div><div class="sk sk-secao-val"></div></div>
+                        <div class="sk-row"><div class="sk sk-check"></div><div class="sk-row-desc"><div class="sk sk-row-name sk-w65"></div><div class="sk sk-row-date sk-w50"></div><div class="sk sk-row-tags sk-w30"></div></div><div class="sk sk-row-valor"></div><div class="sk sk-row-acoes"></div></div>
+                        <div class="sk-row"><div class="sk sk-check"></div><div class="sk-row-desc"><div class="sk sk-row-name sk-w50"></div><div class="sk sk-row-date sk-w40"></div><div class="sk sk-row-tags sk-w40"></div></div><div class="sk sk-row-valor"></div><div class="sk sk-row-acoes"></div></div>
+                        <div class="sk-secao-title-sk sk-mt-sm"><div class="sk sk-secao-lbl"></div><div class="sk sk-secao-val"></div></div>
+                        <div class="sk-row"><div class="sk sk-check"></div><div class="sk-row-desc"><div class="sk sk-row-name sk-w60"></div><div class="sk sk-row-date sk-w45"></div><div class="sk sk-row-tags sk-w25"></div></div><div class="sk sk-row-valor"></div><div class="sk sk-row-acoes"></div></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="authOverlay" class="auth-overlay hidden" aria-hidden="true">
         <div class="auth-card">
-            <span class="logo-accent">$</span>
+            <span class="logo-mark" aria-hidden="true">
+                <img src="/design-system/logos/monesy-mark.svg" width="32" height="32" alt="">
+            </span>
             <h2 id="authTitle">Entrar</h2>
             <p class="auth-subtitle" id="authSubtitle">Acesse sua conta Monesy</p>
             <form id="authForm" class="auth-form" autocomplete="on">
@@ -60,38 +153,46 @@
         </div>
     </div>
 
-    <header class="header">
-        <div class="header-left">
-            <span class="logo-accent">$</span>
-            <div>
-                <h1>Monesy</h1>
-                <p class="subtitle" id="headerSubtitle">Receitas, despesas e saldo mensal</p>
+    <header class="header" id="appHeader">
+        <div class="header-top">
+            <div class="header-left">
+                <span class="logo-mark" aria-hidden="true">
+                    <img src="/design-system/logos/monesy-mark-on-dark.svg" width="28" height="28" alt="">
+                </span>
+                <div class="header-title-wrap">
+                    <h1>Monesy</h1>
+                    <p class="subtitle" id="headerSubtitle">Receitas, despesas e saldo mensal</p>
+                </div>
+                <button type="button" class="btn btn-ghost btn-logout hidden" id="btnLogout" title="Sair">Sair</button>
             </div>
-            <button type="button" class="btn btn-ghost btn-logout hidden" id="btnLogout" title="Sair">Sair</button>
+            <div class="header-top-actions">
+                <button type="button" class="header-menu-toggle" id="btnHeaderMenu" aria-label="Abrir menu" aria-expanded="false" aria-controls="headerActions">
+                    <span class="material-icons" aria-hidden="true">menu</span>
+                </button>
+            </div>
         </div>
-        <div class="header-actions">
+        <div class="header-actions" id="headerActions">
             <label class="field-inline gastos-only">
                 Ano
                 <div class="field-with-action ano-wrapper">
                     <select id="anoSelect"></select>
-                    <button type="button" class="btn-icon-mini" id="btnNovoAno" title="Adicionar ano" aria-label="Adicionar ano">+</button>
-                    <button type="button" class="btn-icon-mini btn-icon-danger" id="btnExcluirAno" title="Excluir ano" aria-label="Excluir ano">&times;</button>
+                    <button type="button" class="btn-icon-mini" id="btnNovoAno" title="Adicionar ano" aria-label="Adicionar ano"><span class="material-icons" aria-hidden="true">add</span></button>
+                    <button type="button" class="btn-icon-mini btn-icon-danger" id="btnExcluirAno" title="Excluir ano" aria-label="Excluir ano"><span class="material-icons" aria-hidden="true">delete_outline</span></button>
                 </div>
             </label>
-            <button type="button" class="btn-theme-toggle" id="btnTheme" title="Alternar modo escuro" aria-label="Alternar tema"></button>
             <div class="header-buttons">
-                <button type="button" class="btn btn-primary assinaturas-only hidden" id="btnNovaAssinatura">+ Nova assinatura</button>
+                <button type="button" class="btn btn-primary assinaturas-only hidden btn-fab" id="btnNovaAssinatura"><span class="material-icons mi-inline" aria-hidden="true">add</span><span class="btn-text">Nova assinatura</span></button>
                 <button type="button" class="btn btn-ghost gastos-only" id="btnDownloadTemplate" title="Baixar modelo Excel">
-                    <span class="btn-icon-inline">⬇</span> Modelo
+                    <span class="material-icons mi-inline" aria-hidden="true">download</span><span class="btn-text">Modelo</span>
                 </button>
                 <button type="button" class="btn btn-ghost gastos-only" id="btnImportExcel" title="Importar lançamentos de Excel">
-                    <span class="btn-icon-inline">⬆</span> Importar
+                    <span class="material-icons mi-inline" aria-hidden="true">upload</span><span class="btn-text">Importar</span>
                 </button>
                 <button type="button" class="btn btn-ghost gastos-only" id="btnLixeira" title="Lixeira — lançamentos excluídos">
-                    🗑 Lixeira
+                    <span class="material-icons mi-inline" aria-hidden="true">delete_outline</span><span class="btn-text">Lixeira</span>
                 </button>
                 <input type="file" id="fileExcel" accept=".xlsx,.xls" style="display:none">
-                <button type="button" class="btn btn-primary gastos-only" id="btnNovo">+ Novo lançamento</button>
+                <button type="button" class="btn btn-primary gastos-only btn-fab" id="btnNovo"><span class="material-icons mi-inline" aria-hidden="true">add</span><span class="btn-text">Novo lançamento</span></button>
             </div>
         </div>
     </header>
@@ -130,13 +231,14 @@
             </article>
         </section>
 
-        <div class="mes-actions" style="display:flex;justify-content:flex-end;margin-bottom:0.5rem">
-            <button type="button" class="btn btn-ghost" id="btnLimparMes">🗑 Limpar mês</button>
+        <div class="mes-actions">
+            <button type="button" class="btn btn-ghost" id="btnLimparMes"><span class="material-icons mi-inline" aria-hidden="true">delete_outline</span> Limpar mês</button>
         </div>
 
         <section class="panel chart-panel">
             <div class="panel-header chart-header">
                 <div class="chart-title">
+                    <span class="panel-eyebrow">Relatório</span>
                     <h2>Visão anual</h2>
                     <span class="chart-subtitle" id="chartSubtitle"></span>
                 </div>
@@ -151,6 +253,7 @@
             <section class="panel">
                 <div class="panel-header">
                     <div class="panel-header-title">
+                        <span class="panel-eyebrow">Entradas</span>
                         <h2>Receitas</h2>
                         <span id="receitasInvestidoTotal" class="secao-invest-badge receitas-invest-total hidden" aria-live="polite"></span>
                     </div>
@@ -162,6 +265,7 @@
             <section class="panel">
                 <div class="panel-header">
                     <div class="panel-header-title">
+                        <span class="panel-eyebrow">Saídas</span>
                         <h2>Despesas</h2>
                         <span id="despesasPagoTotal" class="secao-pago-badge despesas-pago-total hidden" aria-live="polite"></span>
                     </div>
@@ -192,6 +296,7 @@
         <section class="panel">
             <div class="panel-header">
                 <div class="panel-header-title">
+                    <span class="panel-eyebrow">Recorrentes</span>
                     <h2>Assinaturas e recorrentes no cartão</h2>
                     <span class="chart-subtitle">Controle independente do lançamento mensal</span>
                 </div>
@@ -212,6 +317,7 @@
         <section class="panel features-panel">
             <div class="panel-header">
                 <div class="panel-header-title">
+                    <span class="panel-eyebrow">Produto</span>
                     <h2>Features implementadas</h2>
                     <span class="chart-subtitle">Registro das entregas com data e hora</span>
                 </div>
@@ -234,7 +340,7 @@
         <form id="formLancamento" method="dialog">
             <div class="modal-header">
                 <h3 id="modalTitle">Novo lançamento</h3>
-                <button type="button" class="btn-icon" id="btnFecharModal" aria-label="Fechar">&times;</button>
+                <button type="button" class="btn-icon" id="btnFecharModal" aria-label="Fechar"><span class="material-icons" aria-hidden="true">close</span></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="lancId">
@@ -292,7 +398,7 @@
         <form id="formExcluirAno" method="dialog">
             <div class="modal-header">
                 <h3>Excluir ano</h3>
-                <button type="button" class="btn-icon" id="btnFecharExcluirAno" aria-label="Fechar">&times;</button>
+                <button type="button" class="btn-icon" id="btnFecharExcluirAno" aria-label="Fechar"><span class="material-icons" aria-hidden="true">close</span></button>
             </div>
             <div class="modal-body">
                 <p class="confirm-text">
@@ -312,7 +418,7 @@
         <form id="formAno" method="dialog">
             <div class="modal-header">
                 <h3>Novo ano</h3>
-                <button type="button" class="btn-icon" id="btnFecharAno" aria-label="Fechar">&times;</button>
+                <button type="button" class="btn-icon" id="btnFecharAno" aria-label="Fechar"><span class="material-icons" aria-hidden="true">close</span></button>
             </div>
             <div class="modal-body">
                 <label>
@@ -332,7 +438,7 @@
         <form id="formAssinatura" method="dialog">
             <div class="modal-header">
                 <h3 id="modalAssinaturaTitle">Nova assinatura</h3>
-                <button type="button" class="btn-icon" id="btnFecharModalAssinatura" aria-label="Fechar">&times;</button>
+                <button type="button" class="btn-icon" id="btnFecharModalAssinatura" aria-label="Fechar"><span class="material-icons" aria-hidden="true">close</span></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="assinaturaId">
@@ -375,7 +481,7 @@
                 <h3>Histórico de alterações</h3>
                 <p class="modal-subtitle" id="historicoSubtitle"></p>
             </div>
-            <button type="button" class="btn-icon" id="btnFecharHistorico" aria-label="Fechar">&times;</button>
+            <button type="button" class="btn-icon" id="btnFecharHistorico" aria-label="Fechar"><span class="material-icons" aria-hidden="true">close</span></button>
         </div>
         <div class="modal-body" id="historicoBody" style="min-height:120px"></div>
         <div class="modal-footer">
@@ -387,10 +493,10 @@
     <dialog id="modalLixeira" class="modal modal-lg">
         <div class="modal-header">
             <div>
-                <h3>🗑 Lixeira</h3>
+                <h3><span class="material-icons mi-inline" aria-hidden="true">delete_outline</span> Lixeira</h3>
                 <p class="modal-subtitle">Lançamentos excluídos — restaure ou remova permanentemente</p>
             </div>
-            <button type="button" class="btn-icon" id="btnFecharLixeira" aria-label="Fechar">&times;</button>
+            <button type="button" class="btn-icon" id="btnFecharLixeira" aria-label="Fechar"><span class="material-icons" aria-hidden="true">close</span></button>
         </div>
         <div class="modal-body" id="lixeiraBody" style="min-height:120px;padding:0"></div>
         <div class="modal-footer">
@@ -398,6 +504,8 @@
             <button type="button" class="btn btn-secondary" id="btnFecharLixeiraFooter">Fechar</button>
         </div>
     </dialog>
+
+    <button type="button" class="theme-fab" id="btnTheme" title="Alternar modo escuro" aria-label="Alternar tema"></button>
 
     <div id="toast" class="toast hidden" role="status"></div>
 </body>

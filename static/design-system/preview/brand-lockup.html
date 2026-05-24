@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 24px; }
+  .frame { width: 700px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
+  .row {
+    border-radius: 12px;
+    padding: 22px 28px;
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+  }
+  .row.cream { background: var(--cream); }
+  .row.dark { background: var(--petrol-deep); }
+  .mark { width: 44px; height: 44px; }
+  .word {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 44px;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    color: var(--petrol);
+    display: inline-flex; align-items: baseline; position: relative;
+  }
+  .word.cream-text { color: var(--cream); }
+  .word .o { display: inline-block; }
+  .caption {
+    margin-top: 4px;
+    font-family: var(--font-mono); font-size: 10px; color: var(--gray);
+    letter-spacing: 0.10em; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="row cream">
+    <img class="mark" src="../assets/logos/monesy-mark.svg" />
+    <span class="word">m<span class="o">o</span>nesy</span>
+  </div>
+  <div class="row dark">
+    <img class="mark" src="../assets/logos/monesy-mark-on-dark.svg" />
+    <span class="word cream-text">m<span class="o">o</span>nesy</span>
+  </div>
+  <div class="caption" style="text-align:center;">Horizontal lockup · Alte Haas Grotesk Bold / −4% tracking</div>
+</div>
+</body>
+</html>

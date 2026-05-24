@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 24px; }
+  .card-frame { width: 700px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; }
+  .money-big {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 52px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .ledger {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.7;
+    background: var(--cream);
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .ledger .pos { color: var(--green); }
+  .ledger .neg { color: var(--red); }
+  .meta {
+    display: flex; gap: 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+  }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div>
+    <div class="money-big">R$ 1.247,80</div>
+    <div class="meta" style="margin-top:8px;">
+      <span>JetBrains Mono · 500</span>
+      <span>R$ com NBSP</span>
+      <span>vírgula decimal</span>
+    </div>
+  </div>
+  <div class="ledger">
+    <span class="pos">+ R$ 320,00</span> &nbsp;entrada<br/>
+    <span class="neg">− R$ 89,40</span> &nbsp;mercado<br/>
+    12/03 · ag. 0001 · c. 12345-6
+  </div>
+</div>
+</body>
+</html>

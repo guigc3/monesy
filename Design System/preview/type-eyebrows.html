@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 24px; }
+  .card-frame { width: 700px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
+  .group { display: flex; flex-direction: column; gap: 6px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--petrol);
+  }
+  .h-after {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .label-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--gray);
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 8px;
+  }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div class="group">
+    <span class="eyebrow">Entradas</span>
+    <h3 class="h-after">Receitas</h3>
+  </div>
+  <div class="group">
+    <span class="eyebrow" style="color:var(--gold-deep);">Recorrentes</span>
+    <h3 class="h-after">Assinaturas no cartão</h3>
+  </div>
+  <div class="label-row">
+    <span class="pill-label">Entrada</span>
+    <span class="pill-label">Saída total</span>
+    <span class="pill-label">A pagar</span>
+    <span class="pill-label">Caixa disponível</span>
+  </div>
+</div>
+</body>
+</html>

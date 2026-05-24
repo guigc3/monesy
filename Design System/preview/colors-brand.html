@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 20px; }
+  .card-frame {
+    width: 700px;
+    box-sizing: border-box;
+  }
+
+  /* ── PALETTE GRID ── */
+  .palette {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .swatch {
+    aspect-ratio: 1.5 / 1;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid transparent;
+    overflow: hidden;
+  }
+  .swatch.bordered { border-color: var(--line); }
+  .swatch .name {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .swatch .role {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-top: 2px;
+  }
+  .swatch .hex {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    opacity: 0.78;
+  }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div class="palette">
+    <div class="swatch" style="background:#00ACC1;color:#F2F3F5;">
+      <div><div class="role">Primária</div><div class="name">Nordic Teal</div></div>
+      <div class="hex">#00ACC1</div>
+    </div>
+    <div class="swatch" style="background:#006A75;color:#F2F3F5;">
+      <div><div class="role">Backgrounds</div><div class="name">Teal Dark</div></div>
+      <div class="hex">#006A75</div>
+    </div>
+    <div class="swatch" style="background:#D4AF37;color:#006A75;">
+      <div><div class="role">Acento</div><div class="name">Champagne Gold</div></div>
+      <div class="hex">#D4AF37</div>
+    </div>
+    <div class="swatch" style="background:#A88820;color:#F2F3F5;">
+      <div><div class="role">Acento alt.</div><div class="name">Gold Deep</div></div>
+      <div class="hex">#A88820</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

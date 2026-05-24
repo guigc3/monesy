@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 20px; }
+  .card-frame { width: 700px; box-sizing: border-box; }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .chip {
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .chip .dot {
+    width: 18px; height: 18px; border-radius: 999px;
+  }
+  .chip .name {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .chip .role {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+  .chip .hex {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+  .ratio {
+    margin-top: 14px;
+    display: flex;
+    height: 30px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .ratio > div {
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div class="row">
+    <div class="chip">
+      <div class="dot" style="background:#16a34a;"></div>
+      <div class="name">Positivo</div>
+      <div class="role">Entrada · saldo</div>
+      <div class="hex">#16a34a</div>
+    </div>
+    <div class="chip">
+      <div class="dot" style="background:#dc2626;"></div>
+      <div class="name">Negativo</div>
+      <div class="role">Despesa · excluir</div>
+      <div class="hex">#dc2626</div>
+    </div>
+    <div class="chip">
+      <div class="dot" style="background:#D4AF37;"></div>
+      <div class="name">Atenção</div>
+      <div class="role">Pendente · acento</div>
+      <div class="hex">#D4AF37</div>
+    </div>
+    <div class="chip">
+      <div class="dot" style="background:#00ACC1;"></div>
+      <div class="name">Info</div>
+      <div class="role">Caixa · primário</div>
+      <div class="hex">#00ACC1</div>
+    </div>
+  </div>
+  <div class="ratio">
+    <div style="flex:62;background:#00ACC1;color:#F2F3F5;">62% Petróleo</div>
+    <div style="flex:18;background:#4169E1;color:#F2F3F5;">18% Azul royal</div>
+    <div style="flex:10;background:#FAFAF9;color:#6B7280;border-right:1px solid var(--line);">10% Neutros</div>
+    <div style="flex:10;background:#D4AF37;color:#006A75;">10% Gold</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--paper); }
+  body { padding: 24px; }
+  .card-frame { width: 700px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; }
+  .row { display: grid; grid-template-columns: 110px 1fr; gap: 18px; align-items: baseline; border-bottom: 1px solid var(--border-soft); padding-bottom: 10px; }
+  .row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+  }
+  h1.demo { font-size: 32px; }
+  h2.demo { font-size: 22px; }
+  h3.demo { font-size: 16px; font-weight: 600; }
+  p.demo { font-size: 14px; color: var(--text-primary); }
+  small.demo { font-size: 13px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="card-frame">
+  <div class="row"><span class="label">H1 · 32 · 700</span><h1 class="demo">Visão anual</h1></div>
+  <div class="row"><span class="label">H2 · 22 · 600</span><h2 class="demo">Caixa disponível</h2></div>
+  <div class="row"><span class="label">H3 · 16 · 600</span><h3 class="demo">Despesas fixas</h3></div>
+  <div class="row"><span class="label">Body · 14 · 400</span><p class="demo">A gente organiza seus gastos do mês. Você só conta pra onde foi.</p></div>
+  <div class="row"><span class="label">Body sm · 13</span><small class="demo">Receitas em caixa − investido − despesas pagas</small></div>
+</div>
+</body>
+</html>

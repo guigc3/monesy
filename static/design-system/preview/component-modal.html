@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: #E6E4DF; }
+  body { padding: 20px; }
+  .frame { width: 700px; }
+  .modal {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 48px rgba(22,25,31,0.16);
+  }
+  .modal-header {
+    padding: 18px 22px 14px;
+    background: var(--cream);
+    border-top: 3px solid var(--petrol);
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-header h3 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .modal-header .x {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 20px;
+    border-radius: 6px;
+  }
+  .modal-body {
+    padding: 18px 22px;
+    display: grid; gap: 12px;
+  }
+  .modal-body label {
+    display: grid; gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--petrol-deep);
+  }
+  .modal-body input, .modal-body select {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--cream);
+    letter-spacing: normal;
+    text-transform: none;
+  }
+  .modal-footer {
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 12px 22px;
+    background: var(--cream);
+    border-top: 1px solid var(--line);
+  }
+  .btn { border: none; border-radius: 10px; padding: 8px 14px; font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--petrol) 0%, var(--petrol-deep) 100%);
+    color: var(--cream);
+    box-shadow: 0 2px 8px rgba(0,172,193,0.28);
+  }
+  .btn-secondary { background: var(--cream); border: 1px solid var(--line); color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Novo lançamento</h3>
+      <span class="x">×</span>
+    </div>
+    <div class="modal-body">
+      <label>Descrição<input value="Conta de luz" /></label>
+      <label>Seção<select><option>Despesas fixas</option></select></label>
+      <label>Valor (R$)<input type="number" value="187.40" /></label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary">Cancelar</button>
+      <button class="btn btn-primary">Salvar</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

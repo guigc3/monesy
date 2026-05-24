@@ -28,6 +28,7 @@ app = Flask(__name__, static_folder="static", static_url_path="")
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DESIGN_SYSTEM_DIR = os.path.join(BASE_DIR, "Design System")
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "gastos.json")
 ASSINATURAS_FILE = os.path.join(DATA_DIR, "assinaturas.json")
@@ -39,6 +40,33 @@ MESES = [
 ]
 
 os.makedirs(DATA_DIR, exist_ok=True)
+
+
+def _ensure_design_system_static_link():
+    """Espelha Design System/ em static/design-system para servir CSS/fontes/logos."""
+    static_ds = os.path.join(BASE_DIR, "static", "design-system")
+    if os.path.exists(static_ds):
+        return
+    if not os.path.isdir(DESIGN_SYSTEM_DIR):
+        return
+    try:
+        if os.name == "nt":
+            import subprocess
+            subprocess.run(
+                ["cmd", "/c", "mklink", "/J", static_ds, DESIGN_SYSTEM_DIR],
+                check=True,
+                capture_output=True,
+            )
+        else:
+            os.symlink(DESIGN_SYSTEM_DIR, static_ds, target_is_directory=True)
+    except OSError:
+        print(
+            "AVISO: static/design-system ausente. Crie o link para Design System/ "
+            "ou reinicie apos: mklink /J static\\design-system \"Design System\""
+        )
+
+
+_ensure_design_system_static_link()
 
 auth.init_app(app)
 
@@ -252,8 +280,16 @@ def index():
     return send_from_directory(app.static_folder, "index.html")
 
 
+@app.route("/design-system/<path:filename>")
+def design_system(filename):
+    return send_from_directory(DESIGN_SYSTEM_DIR, filename)
+
+
 @app.route("/logos/<path:filename>")
 def logos(filename):
+    ds_logos = os.path.join(DESIGN_SYSTEM_DIR, "logos")
+    if os.path.isfile(os.path.join(ds_logos, filename)):
+        return send_from_directory(ds_logos, filename)
     return send_from_directory(os.path.join(BASE_DIR, "logos"), filename)
 
 
