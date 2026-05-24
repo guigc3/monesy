@@ -21,6 +21,8 @@ export const CK = {
   lixeira: 'lixeira',
   assinaturas: 'assinaturas',
   features: 'features',
+  metas: 'metas',
+  recorrentes: 'recorrentes',
 }
 
 export function bustPrefix(prefix) {

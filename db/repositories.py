@@ -268,6 +268,32 @@ class BaseRepository:
         secoes = self.list_secoes(user_id)
         return {"lancamentos": lancs, "secoes": secoes}
 
+    # --- metas ------------------------------------------------------------
+    def list_metas(self, user_id: str) -> List[dict]:
+        return []
+
+    def set_meta(
+        self,
+        user_id: str,
+        tipo: str,
+        secao: str,
+        valor: Optional[float],
+    ) -> List[dict]:
+        return []
+
+    # --- recorrentes ------------------------------------------------------
+    def list_recorrentes(self, user_id: str) -> List[dict]:
+        return []
+
+    def get_recorrente(self, user_id: str, rec_id: str) -> Optional[dict]:
+        return None
+
+    def upsert_recorrente(self, user_id: str, item: dict) -> dict:
+        raise NotImplementedError
+
+    def delete_recorrente(self, user_id: str, rec_id: str) -> bool:
+        return False
+
     # --- features ---------------------------------------------------------
     def list_features(self) -> List[dict]:
         raise NotImplementedError
@@ -315,6 +341,8 @@ class JsonRepository(BaseRepository):
         data.setdefault("lancamentos", [])
         data.setdefault("lixeira", [])
         data.setdefault("meses_revisados", [])
+        data.setdefault("metas", [])
+        data.setdefault("recorrentes", [])
         return data
 
     def _write_gastos(self, data: dict) -> None:
@@ -716,6 +744,79 @@ class JsonRepository(BaseRepository):
             if a.get("id") == item_id:
                 return list(a.get("historico") or [])
         return []
+
+    # ----- metas ----------------------------------------------------------
+    def list_metas(self, user_id: str) -> List[dict]:
+        data = self._read_gastos()
+        metas = data.get("metas") or []
+        return [
+            {
+                "tipo": m.get("tipo"),
+                "secao": m.get("secao"),
+                "valor": float(m.get("valor") or 0),
+            }
+            for m in metas
+            if m.get("tipo") in ("receita", "despesa") and m.get("secao")
+        ]
+
+    def set_meta(
+        self,
+        user_id: str,
+        tipo: str,
+        secao: str,
+        valor: Optional[float],
+    ) -> List[dict]:
+        data = self._read_gastos()
+        metas = data.setdefault("metas", [])
+        metas[:] = [
+            m for m in metas
+            if not (m.get("tipo") == tipo and (m.get("secao") or "").lower() == secao.lower())
+        ]
+        if valor is not None and float(valor) > 0:
+            metas.append({
+                "tipo": tipo,
+                "secao": secao,
+                "valor": round(float(valor), 2),
+            })
+        self._write_gastos(data)
+        return self.list_metas(user_id)
+
+    # ----- recorrentes ----------------------------------------------------
+    def list_recorrentes(self, user_id: str) -> List[dict]:
+        data = self._read_gastos()
+        recs = data.get("recorrentes") or []
+        return [dict(r) for r in recs]
+
+    def get_recorrente(self, user_id: str, rec_id: str) -> Optional[dict]:
+        for r in self.list_recorrentes(user_id):
+            if r.get("id") == rec_id:
+                return r
+        return None
+
+    def upsert_recorrente(self, user_id: str, item: dict) -> dict:
+        data = self._read_gastos()
+        recs = data.setdefault("recorrentes", [])
+        item = dict(item)
+        item.setdefault("id", str(uuid.uuid4()))
+        for i, r in enumerate(recs):
+            if r.get("id") == item["id"]:
+                merged = {**r, **item}
+                recs[i] = merged
+                self._write_gastos(data)
+                return merged
+        recs.append(item)
+        self._write_gastos(data)
+        return item
+
+    def delete_recorrente(self, user_id: str, rec_id: str) -> bool:
+        data = self._read_gastos()
+        recs = data.setdefault("recorrentes", [])
+        n_antes = len(recs)
+        recs[:] = [r for r in recs if r.get("id") != rec_id]
+        if len(recs) == n_antes:
+            return False
+        self._write_gastos(data)
+        return True
 
     # ----- features -------------------------------------------------------
     def list_features(self) -> List[dict]:
@@ -1450,6 +1551,117 @@ class SupabaseRepository(BaseRepository):
         if not secoes.get("receita"):
             secoes["receita"] = list(DEFAULT_SECOES_RECEITA)
         return {"lancamentos": lancs, "secoes": secoes}
+
+    # ----- metas ----------------------------------------------------------
+    def list_metas(self, user_id: str) -> List[dict]:
+        try:
+            rows = (
+                self._client()
+                .table("metas")
+                .select("tipo,secao,valor")
+                .eq("user_id", user_id)
+                .order("tipo")
+                .order("secao")
+                .execute()
+                .data
+                or []
+            )
+        except Exception:
+            return []
+        return [
+            {"tipo": r["tipo"], "secao": r["secao"], "valor": float(r["valor"])}
+            for r in rows
+            if r.get("tipo") in ("receita", "despesa") and r.get("secao")
+        ]
+
+    def set_meta(
+        self,
+        user_id: str,
+        tipo: str,
+        secao: str,
+        valor: Optional[float],
+    ) -> List[dict]:
+        client = self._client()
+        try:
+            if valor is None or float(valor) <= 0:
+                client.table("metas").delete().eq("user_id", user_id).eq("tipo", tipo).eq("secao", secao).execute()
+            else:
+                client.table("metas").upsert(
+                    {
+                        "user_id": user_id,
+                        "tipo": tipo,
+                        "secao": secao,
+                        "valor": round(float(valor), 2),
+                    },
+                    on_conflict="user_id,tipo,secao",
+                ).execute()
+        except Exception:
+            return []
+        return self.list_metas(user_id)
+
+    # ----- recorrentes ----------------------------------------------------
+    def list_recorrentes(self, user_id: str) -> List[dict]:
+        try:
+            rows = (
+                self._client()
+                .table("recorrentes")
+                .select("*")
+                .eq("user_id", user_id)
+                .order("tipo")
+                .order("descricao")
+                .execute()
+                .data
+                or []
+            )
+        except Exception:
+            return []
+        return [
+            {
+                "id": r["id"],
+                "tipo": r.get("tipo"),
+                "descricao": r.get("descricao"),
+                "secao": r.get("secao") or "Geral",
+                "valor": float(r.get("valor") or 0),
+                "observacao": r.get("observacao") or "",
+                "tags": r.get("tags") or [],
+                "ativo": bool(r.get("ativo", True)),
+                "criado_em": r.get("criado_em"),
+            }
+            for r in rows
+        ]
+
+    def get_recorrente(self, user_id: str, rec_id: str) -> Optional[dict]:
+        for r in self.list_recorrentes(user_id):
+            if r.get("id") == rec_id:
+                return r
+        return None
+
+    def upsert_recorrente(self, user_id: str, item: dict) -> dict:
+        item = dict(item)
+        item.setdefault("id", str(uuid.uuid4()))
+        payload = {
+            "id": item["id"],
+            "user_id": user_id,
+            "tipo": item.get("tipo"),
+            "descricao": item.get("descricao"),
+            "secao": item.get("secao") or "Geral",
+            "valor": round(float(item.get("valor") or 0), 2),
+            "observacao": item.get("observacao") or "",
+            "tags": item.get("tags") or [],
+            "ativo": bool(item.get("ativo", True)),
+        }
+        try:
+            self._client().table("recorrentes").upsert(payload).execute()
+        except Exception:
+            return payload
+        return self.get_recorrente(user_id, item["id"]) or payload
+
+    def delete_recorrente(self, user_id: str, rec_id: str) -> bool:
+        try:
+            self._client().table("recorrentes").delete().eq("user_id", user_id).eq("id", rec_id).execute()
+            return True
+        except Exception:
+            return False
 
     # ----- features -------------------------------------------------------
     def list_features(self) -> List[dict]:
@@ -2191,6 +2403,147 @@ class MySQLRepository(BaseRepository):
             (user_id, item_id),
         )
         return [_mysql_parse_hist(r) for r in rows]
+
+    # ----- metas ----------------------------------------------------------
+    _METAS_TABLE_DDL = (
+        "CREATE TABLE IF NOT EXISTS `metas` ("
+        " `id` INT NOT NULL AUTO_INCREMENT,"
+        " `user_id` CHAR(36) NOT NULL,"
+        " `tipo` VARCHAR(20) NOT NULL,"
+        " `secao` VARCHAR(120) NOT NULL,"
+        " `valor` DECIMAL(12,2) NOT NULL,"
+        " `atualizada_em` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+        " PRIMARY KEY (`id`),"
+        " UNIQUE KEY `uq_metas_user_tipo_secao` (`user_id`, `tipo`, `secao`)"
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    )
+
+    def _ensure_metas_table(self) -> None:
+        self._exec(self._METAS_TABLE_DDL)
+
+    def list_metas(self, user_id: str) -> List[dict]:
+        self._ensure_metas_table()
+        rows = self._query(
+            "SELECT tipo, secao, valor FROM metas WHERE user_id = %s ORDER BY tipo, secao",
+            (user_id,),
+        )
+        return [
+            {"tipo": r["tipo"], "secao": r["secao"], "valor": float(r["valor"])}
+            for r in rows
+        ]
+
+    def set_meta(
+        self,
+        user_id: str,
+        tipo: str,
+        secao: str,
+        valor: Optional[float],
+    ) -> List[dict]:
+        self._ensure_metas_table()
+        if valor is None or float(valor) <= 0:
+            self._exec(
+                "DELETE FROM metas WHERE user_id = %s AND tipo = %s AND secao = %s",
+                (user_id, tipo, secao),
+            )
+        else:
+            self._exec(
+                "INSERT INTO metas (user_id, tipo, secao, valor) VALUES (%s, %s, %s, %s) "
+                "ON DUPLICATE KEY UPDATE valor = VALUES(valor), atualizada_em = CURRENT_TIMESTAMP",
+                (user_id, tipo, secao, round(float(valor), 2)),
+            )
+        return self.list_metas(user_id)
+
+    # ----- recorrentes ----------------------------------------------------
+    _RECORRENTES_TABLE_DDL = (
+        "CREATE TABLE IF NOT EXISTS `recorrentes` ("
+        " `id` CHAR(36) NOT NULL,"
+        " `user_id` CHAR(36) NOT NULL,"
+        " `tipo` VARCHAR(20) NOT NULL,"
+        " `descricao` VARCHAR(500) NOT NULL,"
+        " `secao` VARCHAR(255) NOT NULL DEFAULT 'Geral',"
+        " `valor` DECIMAL(12,2) NOT NULL,"
+        " `observacao` TEXT,"
+        " `tags` TEXT,"
+        " `ativo` TINYINT(1) NOT NULL DEFAULT 1,"
+        " `criado_em` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+        " PRIMARY KEY (`id`),"
+        " KEY `idx_rec_user` (`user_id`)"
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    )
+
+    def _ensure_recorrentes_table(self) -> None:
+        self._exec(self._RECORRENTES_TABLE_DDL)
+
+    @staticmethod
+    def _row_to_recorrente(row: dict) -> dict:
+        tags_raw = row.get("tags") or "[]"
+        if isinstance(tags_raw, str):
+            try:
+                tags = json.loads(tags_raw)
+            except Exception:
+                tags = []
+        else:
+            tags = list(tags_raw or [])
+        return {
+            "id": row["id"],
+            "tipo": row["tipo"],
+            "descricao": row["descricao"],
+            "secao": row.get("secao") or "Geral",
+            "valor": float(row["valor"]),
+            "observacao": row.get("observacao") or "",
+            "tags": tags,
+            "ativo": bool(row.get("ativo", 1)),
+            "criado_em": _mysql_ts(row.get("criado_em")),
+        }
+
+    def list_recorrentes(self, user_id: str) -> List[dict]:
+        self._ensure_recorrentes_table()
+        rows = self._query(
+            "SELECT id, tipo, descricao, secao, valor, observacao, tags, ativo, criado_em "
+            "FROM recorrentes WHERE user_id = %s ORDER BY tipo, descricao",
+            (user_id,),
+        )
+        return [self._row_to_recorrente(r) for r in rows]
+
+    def get_recorrente(self, user_id: str, rec_id: str) -> Optional[dict]:
+        self._ensure_recorrentes_table()
+        row = self._query_one(
+            "SELECT id, tipo, descricao, secao, valor, observacao, tags, ativo, criado_em "
+            "FROM recorrentes WHERE user_id = %s AND id = %s",
+            (user_id, rec_id),
+        )
+        return self._row_to_recorrente(row) if row else None
+
+    def upsert_recorrente(self, user_id: str, item: dict) -> dict:
+        self._ensure_recorrentes_table()
+        item = dict(item)
+        item.setdefault("id", str(uuid.uuid4()))
+        tags_json = json.dumps(item.get("tags") or [], ensure_ascii=False)
+        self._exec(
+            "INSERT INTO recorrentes (id, user_id, tipo, descricao, secao, valor, observacao, tags, ativo) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) "
+            "ON DUPLICATE KEY UPDATE tipo=VALUES(tipo), descricao=VALUES(descricao), "
+            "secao=VALUES(secao), valor=VALUES(valor), observacao=VALUES(observacao), "
+            "tags=VALUES(tags), ativo=VALUES(ativo)",
+            (
+                item["id"], user_id, item.get("tipo"), item.get("descricao"),
+                item.get("secao") or "Geral",
+                round(float(item.get("valor") or 0), 2),
+                item.get("observacao") or "",
+                tags_json,
+                1 if item.get("ativo", True) else 0,
+            ),
+        )
+        out = self.get_recorrente(user_id, item["id"])
+        return out or item
+
+    def delete_recorrente(self, user_id: str, rec_id: str) -> bool:
+        self._ensure_recorrentes_table()
+        n = self._exec(
+            "DELETE FROM recorrentes WHERE user_id = %s AND id = %s",
+            (user_id, rec_id),
+        )
+        return n > 0
 
     # ----- features -------------------------------------------------------
     def list_features(self) -> List[dict]:

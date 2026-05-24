@@ -27,12 +27,34 @@ export const useGastosStore = defineStore('gastos', () => {
   const secoes = ref({ receita: [], despesa: [] })
   const allTags = ref([])
   const mesesRevisados = ref(new Set())
-  const despesasSecoes = ref([])
-  const receitasSecoes = ref([])
+  const _despesasSecoesRaw = ref([])
+  const _receitasSecoesRaw = ref([])
   const totaisMes = ref({})
   const anos = ref([])
   const chartData = ref(null)
   const loaded = ref(false)
+  const tagFilter = ref('')
+  const metas = ref([])
+
+  function _filtraSecoes(secs, tag) {
+    if (!tag) return secs
+    const key = tag.toLowerCase()
+    return secs
+      .map((sec) => ({
+        ...sec,
+        itens: sec.itens.filter((it) =>
+          (it.tags || []).some((t) => String(t).toLowerCase() === key)
+        ),
+      }))
+      .filter((sec) => sec.itens.length > 0)
+      .map((sec) => ({
+        ...sec,
+        total: Math.round(sec.itens.reduce((s, i) => s + (i.valor || 0), 0) * 100) / 100,
+      }))
+  }
+
+  const despesasSecoes = computed(() => _filtraSecoes(_despesasSecoesRaw.value, tagFilter.value))
+  const receitasSecoes = computed(() => _filtraSecoes(_receitasSecoesRaw.value, tagFilter.value))
 
   // ─── Totais derivados ────────────────────────────────────────────
   const totalPagoDespesas = computed(() =>
@@ -56,16 +78,31 @@ export const useGastosStore = defineStore('gastos', () => {
     )
   )
 
+  const totalReceitasFiltro = computed(() =>
+    receitasSecoes.value.reduce(
+      (sum, sec) => sum + sec.itens.reduce((s, i) => s + (i.valor || 0), 0),
+      0
+    )
+  )
+
+  const totalDespesasFiltro = computed(() =>
+    despesasSecoes.value.reduce(
+      (sum, sec) => sum + sec.itens.reduce((s, i) => s + (i.valor || 0), 0),
+      0
+    )
+  )
+
   const totaisComputados = computed(() => {
-    const entrada = totaisMes.value.entrada || 0
-    const saida = totaisMes.value.saida || 0
-    const entrada_investida = receitasSecoes.value.length
+    const filtroAtivo = !!tagFilter.value
+    const entrada = filtroAtivo ? totalReceitasFiltro.value : (totaisMes.value.entrada || 0)
+    const saida = filtroAtivo ? totalDespesasFiltro.value : (totaisMes.value.saida || 0)
+    const entrada_investida = receitasSecoes.value.length || filtroAtivo
       ? totalInvestidoReceitas.value
       : (totaisMes.value.entrada_investida ?? 0)
-    const saida_paga = despesasSecoes.value.length
+    const saida_paga = despesasSecoes.value.length || filtroAtivo
       ? totalPagoDespesas.value
       : (totaisMes.value.saida_paga ?? 0)
-    const saida_pendente = despesasSecoes.value.length
+    const saida_pendente = despesasSecoes.value.length || filtroAtivo
       ? totalPendenteDespesas.value
       : (totaisMes.value.saida_pendente ?? 0)
     return {
@@ -76,15 +113,15 @@ export const useGastosStore = defineStore('gastos', () => {
       saida_paga,
       saida_pendente,
       caixa: entrada - entrada_investida - saida_paga,
-      liquido: totaisMes.value.liquido ?? entrada - saida,
+      liquido: filtroAtivo ? entrada - saida : (totaisMes.value.liquido ?? entrada - saida),
     }
   })
 
   // ─── Cache sync ──────────────────────────────────────────────────
   function _applyMesResumo(resumo) {
     totaisMes.value = { ...(resumo.totais || {}) }
-    receitasSecoes.value = resumo.receitas_por_secao || []
-    despesasSecoes.value = resumo.despesas_por_secao || []
+    _receitasSecoesRaw.value = resumo.receitas_por_secao || []
+    _despesasSecoesRaw.value = resumo.despesas_por_secao || []
   }
 
   function applyFromCache() {
@@ -104,6 +141,9 @@ export const useGastosStore = defineStore('gastos', () => {
     if (cacheHas(CK.chart(ano.value))) {
       chartData.value = cacheGet(CK.chart(ano.value))
     }
+    if (cacheHas(CK.metas)) {
+      metas.value = cacheGet(CK.metas) || []
+    }
     loaded.value = true
   }
 
@@ -113,12 +153,14 @@ export const useGastosStore = defineStore('gastos', () => {
     secoes.value = { receita: [], despesa: [] }
     allTags.value = []
     mesesRevisados.value = new Set()
-    despesasSecoes.value = []
-    receitasSecoes.value = []
+    _despesasSecoesRaw.value = []
+    _receitasSecoesRaw.value = []
     totaisMes.value = {}
     anos.value = []
     chartData.value = null
     loaded.value = false
+    tagFilter.value = ''
+    metas.value = []
   }
 
   function _patchMesCache(updater) {
@@ -131,7 +173,7 @@ export const useGastosStore = defineStore('gastos', () => {
 
   // ─── Helpers ────────────────────────────────────────────────────
   function findReceitaItem(id) {
-    for (const sec of receitasSecoes.value) {
+    for (const sec of _receitasSecoesRaw.value) {
       const item = sec.itens.find((i) => i.id === id)
       if (item) return { sec, item }
     }
@@ -139,7 +181,7 @@ export const useGastosStore = defineStore('gastos', () => {
   }
 
   function findDespesaItem(id) {
-    for (const sec of despesasSecoes.value) {
+    for (const sec of _despesasSecoesRaw.value) {
       const item = sec.itens.find((i) => i.id === id)
       if (item) return { sec, item }
     }
@@ -295,6 +337,40 @@ export const useGastosStore = defineStore('gastos', () => {
     await Promise.all([loadMes(), loadChart()])
   }
 
+  async function duplicarLancamento(id) {
+    const novo = await api(`/api/lancamentos/${id}/duplicar`, {
+      method: 'POST',
+      body: JSON.stringify({ ano: ano.value, mes: mes.value }),
+    })
+    toast('Lançamento duplicado')
+    cacheDelete(CK.mes(ano.value, mes.value))
+    cacheDelete(CK.chart(ano.value))
+    await Promise.all([loadMes(), loadChart()])
+    return novo
+  }
+
+  async function copiarMesAnterior(tipos = ['receita', 'despesa']) {
+    const data = await api('/api/lancamentos/copiar-mes', {
+      method: 'POST',
+      body: JSON.stringify({
+        ano: ano.value,
+        mes: mes.value,
+        tipos,
+      }),
+    })
+    const n = data.criados || 0
+    if (n === 0) {
+      toast('Nenhum lançamento encontrado no mês anterior', true)
+    } else {
+      toast(`${n} lançamento${n !== 1 ? 's' : ''} copiado${n !== 1 ? 's' : ''} do mês anterior`)
+    }
+    cacheDelete(CK.mes(ano.value, mes.value))
+    cacheDelete(CK.chart(ano.value))
+    cacheDelete(CK.anos)
+    await Promise.all([loadAnos(), loadMes(), loadChart()])
+    return data
+  }
+
   async function criarSecao(tipo, nome) {
     const data = await api('/api/secoes', {
       method: 'POST',
@@ -338,8 +414,60 @@ export const useGastosStore = defineStore('gastos', () => {
     await Promise.all([loadAnos(), loadMesesRevisados(), loadTags(), loadMes(), loadChart()])
   }
 
+  async function loadMetas() {
+    if (cacheHas(CK.metas)) {
+      metas.value = cacheGet(CK.metas) || []
+      return
+    }
+    try {
+      const data = await api('/api/metas')
+      metas.value = data.metas || []
+      cacheSet(CK.metas, metas.value)
+    } catch (err) {
+      console.warn('[gastos] loadMetas falhou', err)
+      metas.value = []
+    }
+  }
+
+  function metaPara(tipo, secao) {
+    const key = (secao || '').toLowerCase()
+    const found = metas.value.find(
+      (m) => m.tipo === tipo && (m.secao || '').toLowerCase() === key
+    )
+    return found ? Number(found.valor) || 0 : 0
+  }
+
+  async function setMeta(tipo, secao, valor) {
+    const payload = {
+      tipo,
+      secao,
+      valor: valor === null || valor === '' ? null : Number(valor),
+    }
+    const data = await api('/api/metas', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    })
+    metas.value = data.metas || []
+    cacheSet(CK.metas, metas.value)
+    toast(valor === null || valor === '' || Number(valor) === 0 ? 'Meta removida' : 'Meta salva')
+  }
+
   async function downloadTemplate() {
     await apiDownload('/api/template-excel', 'modelo-gastos.xlsx')
+  }
+
+  async function exportar({ escopo = 'mes', formato = 'xlsx' } = {}) {
+    const params = new URLSearchParams({ ano: String(ano.value), formato })
+    let sufixo = `${ano.value}`
+    if (escopo === 'mes') {
+      params.set('mes', String(mes.value))
+      sufixo = `${ano.value}-${String(mes.value).padStart(2, '0')}`
+    }
+    if (tagFilter.value) params.set('tag', tagFilter.value)
+    const ext = formato === 'csv' ? 'csv' : 'xlsx'
+    const filename = `monesy-lancamentos-${sufixo}.${ext}`
+    await apiDownload(`/api/export?${params.toString()}`, filename)
+    toast('Arquivo gerado')
   }
 
   async function importarExcel(file) {
@@ -396,6 +524,7 @@ export const useGastosStore = defineStore('gastos', () => {
       loadSecoes().catch((e) => console.error('[gastos] loadSecoes', e)),
       loadTags().catch((e) => console.error('[gastos] loadTags', e)),
       loadAnos().catch((e) => console.error('[gastos] loadAnos', e)),
+      loadMetas().catch((e) => console.error('[gastos] loadMetas', e)),
     ])
     await Promise.all([
       loadMesesRevisados().catch((e) => console.error('[gastos] loadMesesRevisados', e)),
@@ -408,15 +537,18 @@ export const useGastosStore = defineStore('gastos', () => {
   return {
     ano, mes, secoes, allTags, mesesRevisados,
     despesasSecoes, receitasSecoes, totaisMes, anos, chartData, loaded,
+    tagFilter, metas,
     totaisComputados, totalPagoDespesas, totalInvestidoReceitas, totalPendenteDespesas,
     findReceitaItem, findDespesaItem,
     applyFromCache, reset,
-    loadSecoes, loadAnos, loadTags, loadMesesRevisados,
+    loadSecoes, loadAnos, loadTags, loadMesesRevisados, loadMetas,
     toggleMesRevisado, loadMes, loadChart,
     togglePago, toggleInvestido,
     deleteLancamento, saveLancamento, limparMes,
+    duplicarLancamento, copiarMesAnterior,
+    metaPara, setMeta,
     criarSecao, criarAno, excluirAno,
-    downloadTemplate, importarExcel,
+    downloadTemplate, importarExcel, exportar,
     loadHistorico, loadLixeira,
     restaurarLancamento, deletarPermanente, esvaziarLixeira,
     init,

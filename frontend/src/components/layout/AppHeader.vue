@@ -90,6 +90,24 @@
           <button
             type="button"
             class="btn btn-ghost"
+            title="Exportar mês/ano para Excel ou CSV"
+            @click="emit('openExport'); closeMenu()"
+          >
+            <span class="material-icons mi-inline" aria-hidden="true">file_download</span>
+            <span class="btn-text">Exportar</span>
+          </button>
+          <button
+            type="button"
+            class="btn btn-ghost"
+            title="Templates mensais (recorrentes)"
+            @click="emit('openRecorrentes'); closeMenu()"
+          >
+            <span class="material-icons mi-inline" aria-hidden="true">event_repeat</span>
+            <span class="btn-text">Recorrentes</span>
+          </button>
+          <button
+            type="button"
+            class="btn btn-ghost"
             title="Lixeira"
             @click="emit('openLixeira'); closeMenu()"
           >
@@ -126,7 +144,7 @@ import { useToast } from '@/composables/useToast'
 
 const emit = defineEmits([
   'novoLancamento', 'openModalAno', 'openModalExcluirAno',
-  'openLixeira', 'novaAssinatura',
+  'openLixeira', 'openExport', 'openRecorrentes', 'novaAssinatura',
 ])
 
 const route = useRoute()

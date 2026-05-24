@@ -34,6 +34,7 @@
         @edit="emit('edit', $event)"
         @delete="emit('delete', $event)"
         @historico="emit('historico', $event)"
+        @duplicate="emit('duplicate', $event)"
       />
     </template>
   </section>
@@ -50,7 +51,7 @@ const props = defineProps({
   tipo: { type: String, required: true }, // 'receita' | 'despesa'
 })
 
-const emit = defineEmits(['add', 'edit', 'delete', 'historico'])
+const emit = defineEmits(['add', 'edit', 'delete', 'historico', 'duplicate'])
 
 const gastosStore = useGastosStore()
 

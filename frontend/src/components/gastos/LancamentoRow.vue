@@ -71,6 +71,14 @@
       <button
         type="button"
         class="btn btn-ghost btn-sm"
+        title="Duplicar para este mês"
+        aria-label="Duplicar"
+        @click="emit('duplicate', item.id)"
+        v-html="miDuplicate"
+      ></button>
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm"
         title="Editar"
         aria-label="Editar"
         @click="emit('edit', item)"
@@ -100,7 +108,7 @@ const props = defineProps({
   tipo: { type: String, required: true }, // 'receita' | 'despesa'
 })
 
-const emit = defineEmits(['edit', 'delete', 'historico'])
+const emit = defineEmits(['edit', 'delete', 'historico', 'duplicate'])
 
 const gastosStore = useGastosStore()
 const { toast } = useToast()
@@ -108,9 +116,10 @@ const { toast } = useToast()
 // Ícones pré-compilados
 const miCheck   = mi(MI.checkCircle, 'mi-row')
 const miTrend   = mi(MI.trendingUp,  'mi-row')
-const miHistory = mi(MI.history, 'mi-btn')
-const miEdit    = mi(MI.edit,    'mi-btn')
-const miDelete  = mi(MI.delete,  'mi-btn')
+const miHistory   = mi(MI.history, 'mi-btn')
+const miEdit      = mi(MI.edit,    'mi-btn')
+const miDuplicate = mi(MI.contentCopy, 'mi-btn')
+const miDelete    = mi(MI.delete,  'mi-btn')
 
 const rowClass = computed(() => {
   if (props.tipo === 'despesa' && props.item.pago) return 'row-pago'

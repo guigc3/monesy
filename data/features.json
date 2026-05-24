@@ -149,6 +149,42 @@
       "titulo": "Integração com Supabase (multi-usuário)",
       "descricao": "Autenticação Supabase + Postgres com RLS, camada db/ no Flask, tela de login no frontend, script de migração dos JSONs.",
       "implementado_em": "2026-05-23T18:30:00"
+    },
+    {
+      "id": "f026-filtro-tag",
+      "titulo": "Filtro por tag em Gastos",
+      "descricao": "Chips de tags acima dos painéis filtram lançamentos do mês em tempo real; totais e gráfico respeitam o filtro.",
+      "implementado_em": "2026-05-24T18:50:00"
+    },
+    {
+      "id": "f027-duplicar-copiar-mes",
+      "titulo": "Duplicar lançamento e copiar mês anterior",
+      "descricao": "Ação de duplicar por linha e botão para copiar todos os lançamentos do mês anterior (sem marcar pagos).",
+      "implementado_em": "2026-05-24T18:55:00"
+    },
+    {
+      "id": "f028-export",
+      "titulo": "Exportar para Excel ou CSV",
+      "descricao": "Endpoint /api/export com escolha de mês ou ano, formato XLSX/CSV e respeito ao filtro de tag ativo.",
+      "implementado_em": "2026-05-24T19:00:00"
+    },
+    {
+      "id": "f029-painel-consolidado",
+      "titulo": "Painel consolidado Gastos + Assinaturas",
+      "descricao": "Card com saída do mês, assinaturas ativas, total mensal, % de orçamento comprometido e projeção anual.",
+      "implementado_em": "2026-05-24T19:05:00"
+    },
+    {
+      "id": "f030-metas-secao",
+      "titulo": "Metas mensais por seção",
+      "descricao": "Definir meta por seção (receita ou despesa) com barra de progresso e alerta visual quando ultrapassa.",
+      "implementado_em": "2026-05-24T19:10:00"
+    },
+    {
+      "id": "f031-recorrentes",
+      "titulo": "Lançamentos recorrentes (templates mensais)",
+      "descricao": "Cadastro de templates fixos com gerador idempotente que cria os lançamentos do mês atual sem duplicar.",
+      "implementado_em": "2026-05-24T19:15:00"
     }
   ]
 }

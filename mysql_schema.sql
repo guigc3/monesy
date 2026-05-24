@@ -150,6 +150,42 @@ CREATE TABLE IF NOT EXISTS `assinatura_historico` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
+-- Metas mensais por seção
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `metas` (
+    `id`           INT           NOT NULL AUTO_INCREMENT,
+    `user_id`      CHAR(36)      NOT NULL,
+    `tipo`         VARCHAR(20)   NOT NULL COMMENT 'receita | despesa',
+    `secao`        VARCHAR(120)  NOT NULL,
+    `valor`        DECIMAL(12,2) NOT NULL,
+    `atualizada_em` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_metas_user_tipo_secao` (`user_id`, `tipo`, `secao`),
+    CONSTRAINT `fk_metas_user`
+        FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- Lançamentos recorrentes (templates mensais)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `recorrentes` (
+    `id`          CHAR(36)      NOT NULL,
+    `user_id`     CHAR(36)      NOT NULL,
+    `tipo`        VARCHAR(20)   NOT NULL COMMENT 'receita | despesa',
+    `descricao`   VARCHAR(500)  NOT NULL,
+    `secao`       VARCHAR(255)  NOT NULL DEFAULT 'Geral',
+    `valor`       DECIMAL(12,2) NOT NULL,
+    `observacao`  TEXT,
+    `tags`        TEXT               COMMENT 'JSON array: ["tag1","tag2"]',
+    `ativo`       TINYINT(1)    NOT NULL DEFAULT 1,
+    `criado_em`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_rec_user` (`user_id`),
+    CONSTRAINT `fk_rec_user`
+        FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
 -- Features (changelog global — sem vínculo a usuário)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `features` (
@@ -190,4 +226,10 @@ INSERT IGNORE INTO `features` (`id`, `titulo`, `descricao`, `implementado_em`) V
 ('f022-secoes-tags',         'Seções dinâmicas e tags',                     'Criar seções no modal, chips de tags com sugestões e listagem via API.',                                                                                                 '2026-05-23 00:00:00'),
 ('f023-navegacao-abas',      'Navegação entre abas do app',                 'Gastos mensais, Assinaturas e Features com header e conteúdo contextuais.',                                                                                             '2026-05-23 00:00:00'),
 ('f024-toasts',              'Toasts de feedback',                          'Notificações de sucesso e erro para ações do usuário.',                                                                                                                   '2026-05-23 00:00:00'),
-('f025-mysql',               'Migração para MySQL 5.6 (UOL Host)',          'Troca do Supabase por MySQL 5.6 gerenciado, com autenticação JWT própria e repositório MySQLRepository.',                                                               '2026-05-24 00:00:00');
+('f025-mysql',               'Migração para MySQL 5.6 (UOL Host)',          'Troca do Supabase por MySQL 5.6 gerenciado, com autenticação JWT própria e repositório MySQLRepository.',                                                               '2026-05-24 00:00:00'),
+('f026-filtro-tag',          'Filtro por tag em Gastos',                    'Chips de tags acima dos painéis filtram lançamentos do mês em tempo real; totais e gráfico respeitam o filtro.',                                                          '2026-05-24 18:50:00'),
+('f027-duplicar-copiar-mes', 'Duplicar lançamento e copiar mês anterior',   'Ação de duplicar por linha e botão para copiar todos os lançamentos do mês anterior (sem marcar pagos).',                                                               '2026-05-24 18:55:00'),
+('f028-export',              'Exportar para Excel ou CSV',                  'Endpoint /api/export com escolha de mês ou ano, formato XLSX/CSV e respeito ao filtro de tag ativo.',                                                                    '2026-05-24 19:00:00'),
+('f029-painel-consolidado',  'Painel consolidado Gastos + Assinaturas',     'Card com saída do mês, assinaturas ativas, total mensal, % de orçamento comprometido e projeção anual.',                                                                  '2026-05-24 19:05:00'),
+('f030-metas-secao',         'Metas mensais por seção',                     'Definir meta por seção (receita ou despesa) com barra de progresso e alerta visual quando ultrapassa.',                                                                   '2026-05-24 19:10:00'),
+('f031-recorrentes',         'Lançamentos recorrentes (templates mensais)', 'Cadastro de templates fixos com gerador idempotente que cria os lançamentos do mês atual sem duplicar.',                                                                  '2026-05-24 19:15:00');

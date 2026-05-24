@@ -1,3 +1,4 @@
+import csv
 import io
 import os
 import uuid
@@ -421,6 +422,16 @@ def _build_bootstrap(user_id):
     features = repo.list_features()
     features.sort(key=lambda x: x.get("implementado_em") or "", reverse=True)
 
+    try:
+        metas = repo.list_metas(user_id)
+    except Exception:
+        metas = []
+
+    try:
+        recorrentes = repo.list_recorrentes(user_id)
+    except Exception:
+        recorrentes = []
+
     return {
         "secoes": secoes,
         "tags": tags,
@@ -435,6 +446,8 @@ def _build_bootstrap(user_id):
             "total_mensal_ativas": total_mensal_ativas,
         },
         "features": features,
+        "metas": metas,
+        "recorrentes": recorrentes,
     }
 
 
@@ -645,6 +658,194 @@ def create_secao():
 @auth.require_auth
 def list_tags():
     return jsonify({"tags": get_repository().list_tags(g.user_id)})
+
+
+# ---------------------------------------------------------------------------
+# Metas mensais por seção
+# ---------------------------------------------------------------------------
+
+
+@app.route("/api/metas")
+@auth.require_auth
+def list_metas():
+    try:
+        metas = get_repository().list_metas(g.user_id)
+    except Exception:
+        metas = []
+    return jsonify({"metas": metas})
+
+
+@app.route("/api/metas", methods=["PUT"])
+@auth.require_auth
+def set_meta():
+    body = request.get_json(silent=True) or {}
+    tipo = (body.get("tipo") or "").strip().lower()
+    secao = (body.get("secao") or "").strip()
+    if tipo not in ("receita", "despesa"):
+        return jsonify({"error": "Tipo deve ser 'receita' ou 'despesa'"}), 400
+    if not secao:
+        return jsonify({"error": "Informe a secao"}), 400
+
+    raw_valor = body.get("valor")
+    if raw_valor is None or raw_valor == "":
+        valor = None
+    else:
+        try:
+            valor = round(float(raw_valor), 2)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Valor invalido"}), 400
+        if valor < 0:
+            return jsonify({"error": "Valor nao pode ser negativo"}), 400
+
+    metas = get_repository().set_meta(g.user_id, tipo, secao, valor)
+    return jsonify({"ok": True, "metas": metas})
+
+
+# ---------------------------------------------------------------------------
+# Lançamentos recorrentes (templates mensais)
+# ---------------------------------------------------------------------------
+
+
+def _parse_recorrente_payload(body):
+    tipo = (body.get("tipo") or "").strip().lower()
+    if tipo not in ("receita", "despesa"):
+        raise ValueError("Tipo deve ser 'receita' ou 'despesa'")
+    descricao = (body.get("descricao") or "").strip()
+    if not descricao:
+        raise ValueError("Informe a descricao")
+    secao = (body.get("secao") or "").strip() or ("Receitas" if tipo == "receita" else "Geral")
+    try:
+        valor = round(float(body.get("valor")), 2)
+    except (TypeError, ValueError):
+        raise ValueError("Valor invalido")
+    if valor <= 0:
+        raise ValueError("Valor deve ser maior que zero")
+    return {
+        "tipo": tipo,
+        "descricao": descricao,
+        "secao": secao,
+        "valor": valor,
+        "observacao": (body.get("observacao") or "").strip(),
+        "tags": normalize_tags(body.get("tags")),
+        "ativo": bool(body.get("ativo", True)),
+    }
+
+
+@app.route("/api/recorrentes")
+@auth.require_auth
+def list_recorrentes():
+    try:
+        items = get_repository().list_recorrentes(g.user_id)
+    except Exception:
+        items = []
+    return jsonify({"recorrentes": items, "total": len(items)})
+
+
+@app.route("/api/recorrentes", methods=["POST"])
+@auth.require_auth
+def create_recorrente():
+    body = request.get_json(silent=True) or {}
+    try:
+        payload = _parse_recorrente_payload(body)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    payload["id"] = str(uuid.uuid4())
+    payload["criado_em"] = datetime.now().isoformat(timespec="seconds")
+    item = get_repository().upsert_recorrente(g.user_id, payload)
+    return jsonify(item), 201
+
+
+@app.route("/api/recorrentes/<rec_id>", methods=["PUT"])
+@auth.require_auth
+def update_recorrente(rec_id):
+    repo = get_repository()
+    existing = repo.get_recorrente(g.user_id, rec_id)
+    if not existing:
+        return jsonify({"error": "Recorrente nao encontrado"}), 404
+    body = request.get_json(silent=True) or {}
+    try:
+        payload = _parse_recorrente_payload({**existing, **body})
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    payload["id"] = rec_id
+    payload["criado_em"] = existing.get("criado_em")
+    item = repo.upsert_recorrente(g.user_id, payload)
+    return jsonify(item)
+
+
+@app.route("/api/recorrentes/<rec_id>", methods=["DELETE"])
+@auth.require_auth
+def remove_recorrente(rec_id):
+    if not get_repository().delete_recorrente(g.user_id, rec_id):
+        return jsonify({"error": "Recorrente nao encontrado"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/recorrentes/gerar", methods=["POST"])
+@auth.require_auth
+def gerar_recorrentes():
+    body = request.get_json(silent=True) or {}
+    try:
+        ano = int(body.get("ano"))
+        mes = int(body.get("mes"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Ano/mes obrigatorios"}), 400
+    if mes < 1 or mes > 12:
+        return jsonify({"error": "Mes deve estar entre 1 e 12"}), 400
+
+    repo = get_repository()
+    try:
+        ativos = [r for r in repo.list_recorrentes(g.user_id) if r.get("ativo")]
+    except Exception:
+        ativos = []
+    if not ativos:
+        return jsonify({"ok": True, "criados": 0, "pulados": 0, "total_ativos": 0})
+
+    # Carrega lançamentos do mês para detectar duplicatas (mesma descrição+secao+valor+tipo)
+    existentes = repo.list_lancamentos(g.user_id, ano, mes=mes, with_ultima_alteracao=False)
+    chaves_existentes = set()
+    for l in existentes:
+        chaves_existentes.add((
+            (_descricao(l) or "").lower().strip(),
+            (l.get("secao") or "").lower().strip(),
+            l.get("tipo"),
+            round(float(l.get("valor") or 0), 2),
+        ))
+
+    agora = datetime.now().isoformat(timespec="seconds")
+    novos = []
+    pulados = 0
+    for rec in ativos:
+        chave = (
+            (rec.get("descricao") or "").lower().strip(),
+            (rec.get("secao") or "").lower().strip(),
+            rec.get("tipo"),
+            round(float(rec.get("valor") or 0), 2),
+        )
+        if chave in chaves_existentes:
+            pulados += 1
+            continue
+        chaves_existentes.add(chave)
+        novos.append({
+            "id": str(uuid.uuid4()),
+            "ano": ano,
+            "mes": mes,
+            "tipo": rec.get("tipo"),
+            "descricao": rec.get("descricao"),
+            "secao": rec.get("secao") or ("Receitas" if rec.get("tipo") == "receita" else "Geral"),
+            "valor": round(float(rec.get("valor") or 0), 2),
+            "observacao": rec.get("observacao") or "",
+            "tags": normalize_tags(rec.get("tags")),
+            "criado_em": agora,
+        })
+
+    criados = repo.bulk_insert_lancamentos(g.user_id, novos) if novos else 0
+    return jsonify({
+        "ok": True,
+        "criados": criados,
+        "pulados": pulados,
+        "total_ativos": len(ativos),
+    })
 
 
 # ---------------------------------------------------------------------------
@@ -859,6 +1060,114 @@ def delete_lancamento(lanc_id):
     history = _log_entry("excluido", antes=_snapshot(lanc))
     repo.soft_delete_lancamento(g.user_id, lanc_id, history, excluido_em=now)
     return jsonify({"ok": True})
+
+
+@app.route("/api/lancamentos/<lanc_id>/duplicar", methods=["POST"])
+@auth.require_auth
+def duplicate_lancamento(lanc_id):
+    repo = get_repository()
+    origem = repo.get_lancamento(g.user_id, lanc_id)
+    if not origem:
+        return jsonify({"error": "Lancamento nao encontrado"}), 404
+
+    body = request.get_json(silent=True) or {}
+    ano = body.get("ano", origem.get("ano"))
+    mes = body.get("mes", origem.get("mes"))
+    try:
+        ano = int(ano)
+        mes = int(mes)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Ano/mes invalidos"}), 400
+    if mes < 1 or mes > 12:
+        return jsonify({"error": "Mes deve estar entre 1 e 12"}), 400
+
+    novo = {
+        "id": str(uuid.uuid4()),
+        "ano": ano,
+        "mes": mes,
+        "tipo": origem.get("tipo"),
+        "descricao": _descricao(origem),
+        "secao": origem.get("secao") or ("Receitas" if origem.get("tipo") == "receita" else "Geral"),
+        "valor": round(float(origem.get("valor") or 0), 2),
+        "observacao": origem.get("observacao") or "",
+        "tags": normalize_tags(origem.get("tags")),
+        "criado_em": datetime.now().isoformat(timespec="seconds"),
+    }
+    history = _log_entry("criado", depois=_snapshot(novo))
+    inserted = repo.insert_lancamento(g.user_id, novo, history_entry=history)
+    return jsonify(inserted), 201
+
+
+@app.route("/api/lancamentos/copiar-mes", methods=["POST"])
+@auth.require_auth
+def copy_mes():
+    body = request.get_json(silent=True) or {}
+    try:
+        ano_destino = int(body.get("ano"))
+        mes_destino = int(body.get("mes"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Ano/mes de destino obrigatorios"}), 400
+    if mes_destino < 1 or mes_destino > 12:
+        return jsonify({"error": "Mes deve estar entre 1 e 12"}), 400
+
+    tipos_param = body.get("tipos")
+    if tipos_param is None:
+        tipos = {"receita", "despesa"}
+    else:
+        if isinstance(tipos_param, str):
+            tipos_param = [tipos_param]
+        tipos = {t for t in (tipos_param or []) if t in ("receita", "despesa")}
+        if not tipos:
+            return jsonify({"error": "Informe ao menos um tipo (receita|despesa)"}), 400
+
+    # Calcula mes/ano de origem (mes anterior por padrao)
+    origem = body.get("origem") or {}
+    if origem.get("ano") and origem.get("mes"):
+        try:
+            ano_origem = int(origem["ano"])
+            mes_origem = int(origem["mes"])
+        except (TypeError, ValueError):
+            return jsonify({"error": "Origem invalida"}), 400
+    elif mes_destino == 1:
+        ano_origem = ano_destino - 1
+        mes_origem = 12
+    else:
+        ano_origem = ano_destino
+        mes_origem = mes_destino - 1
+
+    repo = get_repository()
+    lancs_origem = [
+        l for l in repo.list_lancamentos(
+            g.user_id, ano_origem, mes=mes_origem, with_ultima_alteracao=False,
+        )
+        if l.get("tipo") in tipos
+    ]
+    if not lancs_origem:
+        return jsonify({"ok": True, "criados": 0, "ano_origem": ano_origem, "mes_origem": mes_origem})
+
+    agora = datetime.now().isoformat(timespec="seconds")
+    novos = []
+    for lanc in lancs_origem:
+        novos.append({
+            "id": str(uuid.uuid4()),
+            "ano": ano_destino,
+            "mes": mes_destino,
+            "tipo": lanc.get("tipo"),
+            "descricao": _descricao(lanc),
+            "secao": lanc.get("secao") or ("Receitas" if lanc.get("tipo") == "receita" else "Geral"),
+            "valor": round(float(lanc.get("valor") or 0), 2),
+            "observacao": lanc.get("observacao") or "",
+            "tags": normalize_tags(lanc.get("tags")),
+            "criado_em": agora,
+        })
+
+    criados = repo.bulk_insert_lancamentos(g.user_id, novos)
+    return jsonify({
+        "ok": True,
+        "criados": criados,
+        "ano_origem": ano_origem,
+        "mes_origem": mes_origem,
+    })
 
 
 # ---------------------------------------------------------------------------
@@ -1218,6 +1527,114 @@ def import_excel():
         "erros": erros,
         "total_linhas": len(rows) - 1,
     })
+
+
+# ---------------------------------------------------------------------------
+# Export (Excel / CSV)
+# ---------------------------------------------------------------------------
+
+EXPORT_HEADERS = [
+    "Ano", "Mes", "Tipo", "Descricao", "Secao", "Valor", "Status", "Observacao", "Tags",
+]
+
+
+def _lanc_status(lanc: dict) -> str:
+    if lanc.get("tipo") == "despesa":
+        return "pago" if lanc.get("pago") else "pendente"
+    if lanc.get("tipo") == "receita":
+        return "investido" if lanc.get("investido") else "em caixa"
+    return ""
+
+
+def _lancs_para_export(user_id, ano, mes, tag):
+    repo = get_repository()
+    lancs = repo.list_lancamentos(user_id, ano, mes=mes, with_ultima_alteracao=False)
+    if tag:
+        tag_key = tag.lower()
+        lancs = [
+            l for l in lancs
+            if any(t.lower() == tag_key for t in normalize_tags(l.get("tags")))
+        ]
+    lancs.sort(key=lambda l: (l.get("mes", 0), l.get("tipo", ""), _descricao(l)))
+    return [
+        [
+            l.get("ano"),
+            l.get("mes"),
+            l.get("tipo"),
+            _descricao(l),
+            l.get("secao") or "",
+            round(float(l.get("valor") or 0), 2),
+            _lanc_status(l),
+            l.get("observacao") or "",
+            ", ".join(normalize_tags(l.get("tags"))),
+        ]
+        for l in lancs
+    ]
+
+
+@app.route("/api/export")
+@auth.require_auth
+def export_lancamentos():
+    ano = request.args.get("ano", type=int)
+    if not ano:
+        return jsonify({"error": "Parametro 'ano' obrigatorio"}), 400
+    mes = request.args.get("mes", type=int)
+    if mes is not None and (mes < 1 or mes > 12):
+        return jsonify({"error": "Mes deve estar entre 1 e 12"}), 400
+    tag = request.args.get("tag", "").strip() or None
+    fmt = (request.args.get("formato") or "xlsx").lower()
+
+    rows = _lancs_para_export(g.user_id, ano, mes, tag)
+
+    sufixo = f"{ano}" if mes is None else f"{ano}-{mes:02d}"
+    base_name = f"monesy-lancamentos-{sufixo}"
+
+    if fmt == "csv":
+        buf = io.StringIO()
+        writer = csv.writer(buf, delimiter=";", quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(EXPORT_HEADERS)
+        for row in rows:
+            writer.writerow(row)
+        data = buf.getvalue().encode("utf-8-sig")
+        return send_file(
+            io.BytesIO(data),
+            as_attachment=True,
+            download_name=f"{base_name}.csv",
+            mimetype="text/csv; charset=utf-8",
+        )
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Lancamentos"
+
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill(start_color="006A75", end_color="006A75", fill_type="solid")
+    center = Alignment(horizontal="center", vertical="center")
+
+    for col, name in enumerate(EXPORT_HEADERS, 1):
+        cell = ws.cell(row=1, column=col, value=name)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+
+    for r, row in enumerate(rows, 2):
+        for c, val in enumerate(row, 1):
+            ws.cell(row=r, column=c, value=val)
+
+    larguras = [8, 6, 12, 28, 22, 12, 14, 30, 22]
+    for i, w in enumerate(larguras, 1):
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+    ws.freeze_panes = "A2"
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return send_file(
+        buf,
+        as_attachment=True,
+        download_name=f"{base_name}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 
 # ---------------------------------------------------------------------------

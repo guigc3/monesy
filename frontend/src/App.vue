@@ -6,6 +6,8 @@
     <!-- Auth overlay (mysql / supabase) -->
     <AuthOverlay />
 
+    <AppVersion />
+
     <template v-if="!authStore.showOverlay">
       <!-- Cabeçalho -->
       <AppHeader
@@ -13,6 +15,8 @@
         @openModalAno="onOpenModalAno"
         @openModalExcluirAno="onOpenModalExcluirAno"
         @openLixeira="onOpenLixeira"
+        @openExport="onOpenExport"
+        @openRecorrentes="onOpenRecorrentes"
         @novaAssinatura="onNovaAssinatura"
       />
 
@@ -57,6 +61,7 @@ import { ref, onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import AppSkeleton from '@/components/layout/AppSkeleton.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
+import AppVersion from '@/components/layout/AppVersion.vue'
 import AuthOverlay from '@/components/auth/AuthOverlay.vue'
 import ToastNotification from '@/components/ui/ToastNotification.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -85,6 +90,12 @@ function onOpenModalExcluirAno() {
 }
 function onOpenLixeira() {
   currentView.value?.openLixeira?.()
+}
+function onOpenExport() {
+  currentView.value?.openExport?.()
+}
+function onOpenRecorrentes() {
+  currentView.value?.openRecorrentes?.()
 }
 function onNovaAssinatura() {
   currentView.value?.openNovaAssinatura?.()

@@ -13,6 +13,8 @@ export function hydrateBootstrapCache(data) {
   cacheSet(CK.lixeira, { lixeira: data.lixeira || [], total: (data.lixeira || []).length })
   cacheSet(CK.assinaturas, data.assinaturas)
   cacheSet(CK.features, data.features || [])
+  cacheSet(CK.metas, data.metas || [])
+  cacheSet(CK.recorrentes, data.recorrentes || [])
 
   for (const [ano, revisados] of Object.entries(data.meses_revisados || {})) {
     cacheSet(CK.mrev(parseInt(ano, 10)), revisados)
@@ -31,18 +33,26 @@ async function loadUserDataFallback() {
     { useGastosStore },
     { useAssinaturasStore },
     { useFeaturesStore },
+    { useRecorrentesStore },
   ] = await Promise.all([
     import('@/stores/gastos'),
     import('@/stores/assinaturas'),
     import('@/stores/features'),
+    import('@/stores/recorrentes'),
   ])
 
   const gastos = useGastosStore()
   const assinaturas = useAssinaturasStore()
   const features = useFeaturesStore()
+  const recorrentes = useRecorrentesStore()
 
   await gastos.init()
-  await Promise.all([assinaturas.load(), features.load(), gastos.loadLixeira()])
+  await Promise.all([
+    assinaturas.load(),
+    features.load(),
+    gastos.loadLixeira(),
+    recorrentes.load(),
+  ])
 
   const savedAno = gastos.ano
   const savedMes = gastos.mes
@@ -60,6 +70,7 @@ async function loadUserDataFallback() {
   gastos.applyFromCache()
   assinaturas.applyFromCache()
   features.applyFromCache()
+  recorrentes.applyFromCache()
 }
 
 export async function loadUserData() {

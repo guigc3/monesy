@@ -31,14 +31,17 @@ export const useAuthStore = defineStore('auth', () => {
       { useGastosStore },
       { useAssinaturasStore },
       { useFeaturesStore },
+      { useRecorrentesStore },
     ] = await Promise.all([
       import('@/stores/gastos'),
       import('@/stores/assinaturas'),
       import('@/stores/features'),
+      import('@/stores/recorrentes'),
     ])
     useGastosStore().applyFromCache()
     useAssinaturasStore().applyFromCache()
     useFeaturesStore().applyFromCache()
+    useRecorrentesStore().applyFromCache()
   }
 
   async function _bootstrapUser() {
@@ -52,14 +55,17 @@ export const useAuthStore = defineStore('auth', () => {
       { useGastosStore },
       { useAssinaturasStore },
       { useFeaturesStore },
+      { useRecorrentesStore },
     ] = await Promise.all([
       import('@/stores/gastos'),
       import('@/stores/assinaturas'),
       import('@/stores/features'),
+      import('@/stores/recorrentes'),
     ])
     useGastosStore().reset()
     useAssinaturasStore().reset()
     useFeaturesStore().reset()
+    useRecorrentesStore().reset()
   }
 
   // ─── Public API (mesmo contrato que window.AppAuth) ─────────────
