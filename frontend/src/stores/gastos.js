@@ -35,6 +35,7 @@ export const useGastosStore = defineStore('gastos', () => {
   const loaded = ref(false)
   const tagFilter = ref('')
   const metas = ref([])
+  const notaMes = ref('')
 
   function _filtraSecoes(secs, tag) {
     if (!tag) return secs
@@ -161,6 +162,7 @@ export const useGastosStore = defineStore('gastos', () => {
     loaded.value = false
     tagFilter.value = ''
     metas.value = []
+    notaMes.value = ''
   }
 
   function _patchMesCache(updater) {
@@ -349,26 +351,32 @@ export const useGastosStore = defineStore('gastos', () => {
     return novo
   }
 
-  async function copiarMesAnterior(tipos = ['receita', 'despesa']) {
+  async function copiarMes(tipos = ['receita', 'despesa'], origem = null) {
+    const body = { ano: ano.value, mes: mes.value, tipos }
+    if (origem) body.origem = origem
     const data = await api('/api/lancamentos/copiar-mes', {
       method: 'POST',
-      body: JSON.stringify({
-        ano: ano.value,
-        mes: mes.value,
-        tipos,
-      }),
+      body: JSON.stringify(body),
     })
     const n = data.criados || 0
+    const origemLabel = origem
+      ? `${origem.mes}/${origem.ano}`
+      : 'mês anterior'
     if (n === 0) {
-      toast('Nenhum lançamento encontrado no mês anterior', true)
+      toast(`Nenhum lançamento encontrado em ${origemLabel}`, true)
     } else {
-      toast(`${n} lançamento${n !== 1 ? 's' : ''} copiado${n !== 1 ? 's' : ''} do mês anterior`)
+      toast(`${n} lançamento${n !== 1 ? 's' : ''} copiado${n !== 1 ? 's' : ''} de ${origemLabel}`)
     }
     cacheDelete(CK.mes(ano.value, mes.value))
     cacheDelete(CK.chart(ano.value))
     cacheDelete(CK.anos)
     await Promise.all([loadAnos(), loadMes(), loadChart()])
     return data
+  }
+
+  // compat alias
+  async function copiarMesAnterior(tipos = ['receita', 'despesa']) {
+    return copiarMes(tipos, null)
   }
 
   async function criarSecao(tipo, nome) {
@@ -450,6 +458,23 @@ export const useGastosStore = defineStore('gastos', () => {
     metas.value = data.metas || []
     cacheSet(CK.metas, metas.value)
     toast(valor === null || valor === '' || Number(valor) === 0 ? 'Meta removida' : 'Meta salva')
+  }
+
+  async function loadNota() {
+    try {
+      const data = await api(`/api/notas?ano=${ano.value}&mes=${mes.value}`)
+      notaMes.value = data.texto || ''
+    } catch {
+      notaMes.value = ''
+    }
+  }
+
+  async function saveNota(texto) {
+    const data = await api('/api/notas', {
+      method: 'PUT',
+      body: JSON.stringify({ ano: ano.value, mes: mes.value, texto }),
+    })
+    notaMes.value = data.texto || ''
   }
 
   async function downloadTemplate() {
@@ -536,8 +561,11 @@ export const useGastosStore = defineStore('gastos', () => {
 
   return {
     ano, mes, secoes, allTags, mesesRevisados,
-    despesasSecoes, receitasSecoes, totaisMes, anos, chartData, loaded,
-    tagFilter, metas,
+    despesasSecoes, receitasSecoes,
+    despesasSecoesRaw: _despesasSecoesRaw,
+    receitasSecoesRaw: _receitasSecoesRaw,
+    totaisMes, anos, chartData, loaded,
+    tagFilter, metas, notaMes,
     totaisComputados, totalPagoDespesas, totalInvestidoReceitas, totalPendenteDespesas,
     findReceitaItem, findDespesaItem,
     applyFromCache, reset,
@@ -545,8 +573,9 @@ export const useGastosStore = defineStore('gastos', () => {
     toggleMesRevisado, loadMes, loadChart,
     togglePago, toggleInvestido,
     deleteLancamento, saveLancamento, limparMes,
-    duplicarLancamento, copiarMesAnterior,
+    duplicarLancamento, copiarMes, copiarMesAnterior,
     metaPara, setMeta,
+    loadNota, saveNota,
     criarSecao, criarAno, excluirAno,
     downloadTemplate, importarExcel, exportar,
     loadHistorico, loadLixeira,

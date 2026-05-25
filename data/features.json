@@ -1,190 +1,64 @@
 {
   "features": [
     {
-      "id": "f001-crud-mensal",
-      "titulo": "CRUD de receitas e despesas mensais",
-      "descricao": "Lançamentos por ano/mês com descrição, valor, seções, tags e observações.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-01",
+      "titulo": "Metas por seção",
+      "descricao": "Defina um orçamento por seção (ex.: Alimentação, Transporte). Uma barra de progresso colorida indica se você está dentro, próximo ou acima da meta. Verde = ok, amarelo = atenção, vermelho = estouro.",
+      "implementado_em": "2026-05-10T10:00:00"
     },
     {
-      "id": "f002-caixa-orcamento",
-      "titulo": "Caixa disponível e orçamento",
-      "descricao": "Cards de entrada, saída total, caixa, a pagar e orçamento do mês.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-02",
+      "titulo": "Lançamentos recorrentes automáticos",
+      "descricao": "Crie templates mensais de lançamentos fixos (salário, aluguel, mensalidades). Com um clique, gere todos os recorrentes ativos no mês atual sem precisar digitar um por um.",
+      "implementado_em": "2026-05-10T11:00:00"
     },
     {
-      "id": "f003-pago-investido",
-      "titulo": "Despesas pagas e receitas investidas",
-      "descricao": "Checkboxes que afetam o caixa disponível e o visual das linhas.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-03",
+      "titulo": "Filtro por período na Visão Geral",
+      "descricao": "Selecione um intervalo de meses (ex.: Jan–Jun) na aba Visão Geral e veja o saldo acumulado do período — entrada total, saída total e resultado líquido — calculado automaticamente a partir dos dados anuais.",
+      "implementado_em": "2026-05-24T10:00:00"
     },
     {
-      "id": "f004-grafico-anual",
-      "titulo": "Gráfico de visão anual",
-      "descricao": "Chart.js com entrada, saída e saldo líquido por mês do ano selecionado.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-04",
+      "titulo": "Gráfico de pizza por seção",
+      "descricao": "Visualize a distribuição percentual de despesas ou receitas por seção no mês atual. O gráfico donut interativo exibe rótulos, percentuais e valores ao passar o mouse. Alterne entre Despesas e Receitas com um clique.",
+      "implementado_em": "2026-05-24T10:10:00"
     },
     {
-      "id": "f005-modo-escuro",
-      "titulo": "Modo escuro",
-      "descricao": "Alternância de tema com preferência em localStorage e suporte no gráfico.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-05",
+      "titulo": "Histórico de evolução de uma tag",
+      "descricao": "Ao selecionar uma tag no filtro, um painel aparece automaticamente com um gráfico de barras mostrando a evolução mês a mês (receitas e despesas) dessa tag ao longo do ano atual.",
+      "implementado_em": "2026-05-24T10:20:00"
     },
     {
-      "id": "f006-historico-lanc",
-      "titulo": "Histórico de alterações por lançamento",
-      "descricao": "Log de criado, editado, pago, investido, excluído e restaurado com modal.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-06",
+      "titulo": "Comparativo mês a mês",
+      "descricao": "Os cards de resumo (Entrada, Saída, Caixa, Orçamento) exibem indicadores ▲▼ mostrando a variação absoluta em relação ao mês anterior, facilitando a identificação de tendências de gastos.",
+      "implementado_em": "2026-05-24T10:30:00"
     },
     {
-      "id": "f007-lixeira",
-      "titulo": "Lixeira de lançamentos",
-      "descricao": "Exclusão reversível com restauração, exclusão permanente e esvaziar lixeira.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-07",
+      "titulo": "Duplicar mês para outro ano",
+      "descricao": "Escolha qualquer combinação de ano e mês como origem ao copiar lançamentos. Antes, só era possível copiar do mês imediatamente anterior. Agora você pode replicar janeiro de 2025 em março de 2026, por exemplo.",
+      "implementado_em": "2026-05-24T10:40:00"
     },
     {
-      "id": "f008-meses-revisados",
-      "titulo": "Meses revisados",
-      "descricao": "Marcação de meses conferidos na barra de abas mensais.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-08",
+      "titulo": "Notas do mês",
+      "descricao": "Adicione um texto livre a qualquer mês — observações sobre viagens, imprevistos, metas cumpridas ou qualquer contexto relevante. As notas são salvas por mês/ano e persistem entre sessões.",
+      "implementado_em": "2026-05-24T10:50:00"
     },
     {
-      "id": "f009-excel",
-      "titulo": "Importação e modelo Excel",
-      "descricao": "Download de template e importação de lançamentos via planilha na interface.",
-      "implementado_em": "2026-05-23T00:00:00"
+      "id": "feat-09",
+      "titulo": "Atalhos de teclado",
+      "descricao": "Navegue mais rápido com atalhos globais: N abre o modal de novo lançamento, / foca o filtro de tags. Os atalhos são ignorados quando você está digitando em um campo de texto.",
+      "implementado_em": "2026-05-24T11:00:00"
     },
     {
-      "id": "f010-aba-assinaturas",
-      "titulo": "Aba Assinaturas",
-      "descricao": "CRUD de custos recorrentes no cartão, filtro por cartão, resumo e histórico.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f011-icones-acoes",
-      "titulo": "Ícones padronizados nas ações",
-      "descricao": "Histórico, editar e excluir com os mesmos ícones em Gastos e Assinaturas.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f012-modais-centro",
-      "titulo": "Modais centralizados",
-      "descricao": "Formulários e diálogos exibidos no centro da tela.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f013-aba-features",
-      "titulo": "Aba Features implementadas",
-      "descricao": "Lista cronológica das funcionalidades entregues com data e hora.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f014-limpar-mes",
-      "titulo": "Limpar mês",
-      "descricao": "Move todos os lançamentos do ano/mês atual para a lixeira em lote.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f015-ultima-alteracao-linha",
-      "titulo": "Última alteração na linha",
-      "descricao": "Data e hora da última mudança exibidas em cada lançamento da tabela.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f016-badges-secao",
-      "titulo": "Badges de total pago e investido",
-      "descricao": "Totais por seção e badges consolidados nos painéis de Receitas e Despesas.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f017-caixa-ao-vivo",
-      "titulo": "Atualização ao vivo do caixa",
-      "descricao": "Cards de resumo atualizados ao marcar pago ou investido sem recarregar a página.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f018-destaques-grafico",
-      "titulo": "Destaques do gráfico anual",
-      "descricao": "Melhor mês, pior mês e saída média acima do gráfico de visão anual.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f019-gestao-anos",
-      "titulo": "Gestão de anos",
-      "descricao": "Criar e excluir anos com modais de confirmação e impacto na API.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f020-import-excel-cli",
-      "titulo": "Script import_excel.py",
-      "descricao": "Importação CLI de planilha legada com variáveis PLANILHA_GASTOS e PLANILHA_ANO.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f021-repo-proprio",
-      "titulo": "Repositório Monesy",
-      "descricao": "Projeto separado com API Flask, frontend estático e persistência JSON.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f022-secoes-tags",
-      "titulo": "Seções dinâmicas e tags",
-      "descricao": "Criar seções no modal, chips de tags com sugestões e listagem via API.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f023-navegacao-abas",
-      "titulo": "Navegação entre abas do app",
-      "descricao": "Gastos mensais, Assinaturas e Features com header e conteúdo contextuais.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f024-toasts",
-      "titulo": "Toasts de feedback",
-      "descricao": "Notificações de sucesso e erro para ações do usuário.",
-      "implementado_em": "2026-05-23T00:00:00"
-    },
-    {
-      "id": "f025-integracao-supabase",
-      "titulo": "Integração com Supabase (multi-usuário)",
-      "descricao": "Autenticação Supabase + Postgres com RLS, camada db/ no Flask, tela de login no frontend, script de migração dos JSONs.",
-      "implementado_em": "2026-05-23T18:30:00"
-    },
-    {
-      "id": "f026-filtro-tag",
-      "titulo": "Filtro por tag em Gastos",
-      "descricao": "Chips de tags acima dos painéis filtram lançamentos do mês em tempo real; totais e gráfico respeitam o filtro.",
-      "implementado_em": "2026-05-24T18:50:00"
-    },
-    {
-      "id": "f027-duplicar-copiar-mes",
-      "titulo": "Duplicar lançamento e copiar mês anterior",
-      "descricao": "Ação de duplicar por linha e botão para copiar todos os lançamentos do mês anterior (sem marcar pagos).",
-      "implementado_em": "2026-05-24T18:55:00"
-    },
-    {
-      "id": "f028-export",
-      "titulo": "Exportar para Excel ou CSV",
-      "descricao": "Endpoint /api/export com escolha de mês ou ano, formato XLSX/CSV e respeito ao filtro de tag ativo.",
-      "implementado_em": "2026-05-24T19:00:00"
-    },
-    {
-      "id": "f029-painel-consolidado",
-      "titulo": "Painel consolidado Gastos + Assinaturas",
-      "descricao": "Card com saída do mês, assinaturas ativas, total mensal, % de orçamento comprometido e projeção anual.",
-      "implementado_em": "2026-05-24T19:05:00"
-    },
-    {
-      "id": "f030-metas-secao",
-      "titulo": "Metas mensais por seção",
-      "descricao": "Definir meta por seção (receita ou despesa) com barra de progresso e alerta visual quando ultrapassa.",
-      "implementado_em": "2026-05-24T19:10:00"
-    },
-    {
-      "id": "f031-recorrentes",
-      "titulo": "Lançamentos recorrentes (templates mensais)",
-      "descricao": "Cadastro de templates fixos com gerador idempotente que cria os lançamentos do mês atual sem duplicar.",
-      "implementado_em": "2026-05-24T19:15:00"
+      "id": "feat-10",
+      "titulo": "Dark mode automático por horário",
+      "descricao": "O botão de tema agora possui três modos: Automático (ativa dark entre 19h e 7h), Escuro (sempre dark) e Claro (sempre claro). O modo automático verifica o horário a cada minuto. A preferência é salva no navegador.",
+      "implementado_em": "2026-05-24T11:10:00"
     }
   ]
 }

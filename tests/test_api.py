@@ -374,7 +374,8 @@ class TestAuthEConfig:
 
     def test_bootstrap_agrega_dados_do_usuario(self, gastos_client):
         gastos_client.post("/api/anos", json={"ano": 2026})
-        gastos_client.post(
+        # Cria o lancamento (sem pago — create não aceita esse campo)
+        lanc = gastos_client.post(
             "/api/lancamentos",
             json={
                 "ano": 2026,
@@ -383,9 +384,11 @@ class TestAuthEConfig:
                 "descricao": "Teste bootstrap",
                 "valor": 100,
                 "secao": "Despesas fixas",
-                "pago": True,
             },
-        )
+        ).get_json()
+        # Marca como pago via PUT (fluxo correto)
+        gastos_client.put(f"/api/lancamentos/{lanc['id']}", json={"pago": True})
+
         r = gastos_client.get("/api/bootstrap")
         assert r.status_code == 200
         body = r.get_json()
@@ -400,7 +403,7 @@ class TestAuthEConfig:
         assert "features" in body
         assert "2026" in body["meses_revisados"]
 
-    def test_modo_supabase_bloqueia_sem_token(self, gastos_client, monkeypatch):
+    def test_modo_supabase_bloqueia_sem_token(self, gastos_client, monkeypatch):  # noqa: E301
         monkeypatch.setenv("STORAGE_BACKEND", "supabase")
         monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
         monkeypatch.setenv("SUPABASE_ANON_KEY", "anon-test")
@@ -417,3 +420,149 @@ class TestAuthEConfig:
         body = r3.get_json()
         assert body["backend"] == "supabase"
         assert body["supabase"]["url"] == "https://example.supabase.co"
+
+
+class TestCopiarMesComOrigem:
+    """Feature 7 — Duplicar mês escolhendo ano/mês de origem."""
+
+    def test_copiar_mes_com_origem_explicita(self, gastos_client):
+        # Cria lançamentos em Jan/2025
+        gastos_client.post(
+            "/api/lancamentos",
+            json={"ano": 2025, "mes": 1, "tipo": "despesa",
+                  "descricao": "Aluguel Jan25", "valor": 900, "secao": "Fixos"},
+        )
+        gastos_client.post(
+            "/api/lancamentos",
+            json={"ano": 2025, "mes": 1, "tipo": "receita",
+                  "descricao": "Salário Jan25", "valor": 5000, "secao": "Receitas"},
+        )
+
+        # Copia Jan/2025 → Mar/2026
+        r = gastos_client.post(
+            "/api/lancamentos/copiar-mes",
+            json={"ano": 2026, "mes": 3, "tipos": ["receita", "despesa"],
+                  "origem": {"ano": 2025, "mes": 1}},
+        )
+        assert r.status_code == 200
+        body = r.get_json()
+        assert body["criados"] == 2
+
+        # Verifica que os lançamentos aparecem em Mar/2026
+        lista = gastos_client.get("/api/lancamentos?ano=2026&mes=3").get_json()
+        descricoes = [x["descricao"] for x in lista]
+        assert "Aluguel Jan25" in descricoes
+        assert "Salário Jan25" in descricoes
+
+    def test_copiar_mes_sem_origem_usa_anterior(self, gastos_client):
+        # Cria lançamento em Fev/2026
+        gastos_client.post(
+            "/api/lancamentos",
+            json={"ano": 2026, "mes": 2, "tipo": "despesa",
+                  "descricao": "Internet Fev", "valor": 120, "secao": "Geral"},
+        )
+
+        # Copia sem fornecer origem → deve usar Fev para preencher Mar
+        r = gastos_client.post(
+            "/api/lancamentos/copiar-mes",
+            json={"ano": 2026, "mes": 3, "tipos": ["despesa"]},
+        )
+        assert r.status_code == 200
+        assert r.get_json()["criados"] == 1
+
+    def test_copiar_apenas_receitas(self, gastos_client):
+        gastos_client.post(
+            "/api/lancamentos",
+            json={"ano": 2026, "mes": 4, "tipo": "receita",
+                  "descricao": "Salário", "valor": 8000, "secao": "Receitas"},
+        )
+        gastos_client.post(
+            "/api/lancamentos",
+            json={"ano": 2026, "mes": 4, "tipo": "despesa",
+                  "descricao": "Aluguel", "valor": 1500, "secao": "Fixos"},
+        )
+
+        r = gastos_client.post(
+            "/api/lancamentos/copiar-mes",
+            json={"ano": 2026, "mes": 5, "tipos": ["receita"],
+                  "origem": {"ano": 2026, "mes": 4}},
+        )
+        assert r.status_code == 200
+        assert r.get_json()["criados"] == 1
+
+        lista = gastos_client.get("/api/lancamentos?ano=2026&mes=5").get_json()
+        assert all(x["tipo"] == "receita" for x in lista)
+
+    def test_copiar_mes_destino_igual_origem_vazio(self, gastos_client):
+        # Copia de mês sem lançamentos → 0 criados
+        r = gastos_client.post(
+            "/api/lancamentos/copiar-mes",
+            json={"ano": 2026, "mes": 6, "tipos": ["despesa"],
+                  "origem": {"ano": 2025, "mes": 12}},
+        )
+        assert r.status_code == 200
+        assert r.get_json()["criados"] == 0
+
+
+class TestNotasMes:
+    """Feature 8 — Notas de texto livre por mês."""
+
+    def test_nota_inicial_vazia(self, gastos_client):
+        r = gastos_client.get("/api/notas?ano=2026&mes=5")
+        assert r.status_code == 200
+        body = r.get_json()
+        assert body["texto"] == ""
+        assert body["ano"] == 2026
+        assert body["mes"] == 5
+
+    def test_salvar_e_recuperar_nota(self, gastos_client):
+        r = gastos_client.put(
+            "/api/notas",
+            json={"ano": 2026, "mes": 5, "texto": "Mês de viagem ao exterior."},
+        )
+        assert r.status_code == 200
+        body = r.get_json()
+        assert body["ok"] is True
+        assert body["texto"] == "Mês de viagem ao exterior."
+
+        r2 = gastos_client.get("/api/notas?ano=2026&mes=5")
+        assert r2.get_json()["texto"] == "Mês de viagem ao exterior."
+
+    def test_nota_independente_por_mes(self, gastos_client):
+        gastos_client.put(
+            "/api/notas",
+            json={"ano": 2026, "mes": 1, "texto": "Janeiro"},
+        )
+        gastos_client.put(
+            "/api/notas",
+            json={"ano": 2026, "mes": 2, "texto": "Fevereiro"},
+        )
+        assert gastos_client.get("/api/notas?ano=2026&mes=1").get_json()["texto"] == "Janeiro"
+        assert gastos_client.get("/api/notas?ano=2026&mes=2").get_json()["texto"] == "Fevereiro"
+        assert gastos_client.get("/api/notas?ano=2026&mes=3").get_json()["texto"] == ""
+
+    def test_nota_vazia_remove_chave(self, gastos_client):
+        gastos_client.put(
+            "/api/notas",
+            json={"ano": 2026, "mes": 6, "texto": "Algo"},
+        )
+        r = gastos_client.put(
+            "/api/notas",
+            json={"ano": 2026, "mes": 6, "texto": ""},
+        )
+        assert r.status_code == 200
+        assert r.get_json()["texto"] == ""
+        assert gastos_client.get("/api/notas?ano=2026&mes=6").get_json()["texto"] == ""
+
+    def test_nota_requer_ano_e_mes(self, gastos_client):
+        r1 = gastos_client.get("/api/notas?ano=2026")
+        assert r1.status_code == 400
+
+        r2 = gastos_client.put("/api/notas", json={"texto": "Sem ano e mes"})
+        assert r2.status_code == 400
+
+    def test_nota_diferente_por_ano(self, gastos_client):
+        gastos_client.put("/api/notas", json={"ano": 2025, "mes": 12, "texto": "Dezembro 2025"})
+        gastos_client.put("/api/notas", json={"ano": 2026, "mes": 12, "texto": "Dezembro 2026"})
+        assert gastos_client.get("/api/notas?ano=2025&mes=12").get_json()["texto"] == "Dezembro 2025"
+        assert gastos_client.get("/api/notas?ano=2026&mes=12").get_json()["texto"] == "Dezembro 2026"

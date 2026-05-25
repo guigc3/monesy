@@ -294,6 +294,13 @@ class BaseRepository:
     def delete_recorrente(self, user_id: str, rec_id: str) -> bool:
         return False
 
+    # --- notas de mês ----------------------------------------------------
+    def get_nota_mes(self, user_id: str, ano: int, mes: int) -> str:
+        return ""
+
+    def set_nota_mes(self, user_id: str, ano: int, mes: int, texto: str) -> str:
+        return texto.strip()
+
     # --- features ---------------------------------------------------------
     def list_features(self) -> List[dict]:
         raise NotImplementedError
@@ -343,6 +350,7 @@ class JsonRepository(BaseRepository):
         data.setdefault("meses_revisados", [])
         data.setdefault("metas", [])
         data.setdefault("recorrentes", [])
+        data.setdefault("notas_mes", {})
         return data
 
     def _write_gastos(self, data: dict) -> None:
@@ -817,6 +825,23 @@ class JsonRepository(BaseRepository):
             return False
         self._write_gastos(data)
         return True
+
+    # ----- notas de mês --------------------------------------------------
+    def get_nota_mes(self, user_id: str, ano: int, mes: int) -> str:
+        data = self._read_gastos()
+        return data.get("notas_mes", {}).get(f"{ano}:{mes}", "")
+
+    def set_nota_mes(self, user_id: str, ano: int, mes: int, texto: str) -> str:
+        data = self._read_gastos()
+        notas = data.setdefault("notas_mes", {})
+        key = f"{ano}:{mes}"
+        txt = texto.strip()
+        if txt:
+            notas[key] = txt
+        else:
+            notas.pop(key, None)
+        self._write_gastos(data)
+        return notas.get(key, "")
 
     # ----- features -------------------------------------------------------
     def list_features(self) -> List[dict]:

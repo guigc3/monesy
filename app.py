@@ -705,6 +705,35 @@ def set_meta():
 
 
 # ---------------------------------------------------------------------------
+# Notas do mês
+# ---------------------------------------------------------------------------
+
+
+@app.route("/api/notas")
+@auth.require_auth
+def get_nota():
+    ano = request.args.get("ano", type=int)
+    mes = request.args.get("mes", type=int)
+    if not ano or not mes:
+        return jsonify({"error": "Parâmetros 'ano' e 'mes' obrigatórios"}), 400
+    texto = get_repository().get_nota_mes(g.user_id, ano, mes)
+    return jsonify({"ano": ano, "mes": mes, "texto": texto})
+
+
+@app.route("/api/notas", methods=["PUT"])
+@auth.require_auth
+def set_nota():
+    body = request.get_json(silent=True) or {}
+    ano = body.get("ano")
+    mes = body.get("mes")
+    texto = body.get("texto", "")
+    if not ano or not mes:
+        return jsonify({"error": "Campos 'ano' e 'mes' obrigatórios"}), 400
+    resultado = get_repository().set_nota_mes(g.user_id, int(ano), int(mes), texto)
+    return jsonify({"ok": True, "ano": ano, "mes": mes, "texto": resultado})
+
+
+# ---------------------------------------------------------------------------
 # Lançamentos recorrentes (templates mensais)
 # ---------------------------------------------------------------------------
 

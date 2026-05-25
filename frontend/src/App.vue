@@ -40,24 +40,22 @@
       <!-- Toast global -->
       <ToastNotification />
 
-      <!-- Botão de tema (FAB) -->
+      <!-- Botão de tema (FAB) — cicla: auto → escuro → claro -->
       <button
         type="button"
         class="theme-fab"
-        :title="darkMode ? 'Modo claro' : 'Modo escuro'"
-        :aria-label="darkMode ? 'Modo claro' : 'Modo escuro'"
+        :title="themeFabTitle"
+        :aria-label="themeFabTitle"
         @click="toggleTheme"
       >
-        <span class="material-icons" aria-hidden="true">
-          {{ darkMode ? 'light_mode' : 'dark_mode' }}
-        </span>
+        <span class="material-icons" aria-hidden="true">{{ themeFabIcon }}</span>
       </button>
     </template>
   </template>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import AppSkeleton from '@/components/layout/AppSkeleton.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -67,11 +65,21 @@ import ToastNotification from '@/components/ui/ToastNotification.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useGastosStore } from '@/stores/gastos'
 import { useTheme } from '@/composables/useTheme'
+import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 
 const authStore = useAuthStore()
 const gastosStore = useGastosStore()
-const { darkMode, toggleTheme } = useTheme()
+const { darkMode, themeMode, toggleTheme } = useTheme()
 const currentView = ref(null)
+
+const themeFabIcon = computed(() => {
+  if (themeMode.value === 'auto') return 'brightness_auto'
+  return darkMode.value ? 'light_mode' : 'dark_mode'
+})
+const themeFabTitle = computed(() => {
+  const labels = { auto: 'Automático (19h-7h)', dark: 'Modo escuro', light: 'Modo claro' }
+  return `Tema: ${labels[themeMode.value]} — clique para alternar`
+})
 
 const tabs = [
   { to: '/visao-geral',  name: 'visao-geral',  label: 'Visão Geral' },
@@ -101,6 +109,10 @@ function onOpenRecorrentes() {
 function onNovaAssinatura() {
   currentView.value?.openNovaAssinatura?.()
 }
+
+useKeyboardShortcuts({
+  onNovoLancamento: () => currentView.value?.openModalNovo?.(),
+})
 
 onMounted(async () => {
   await authStore.init()

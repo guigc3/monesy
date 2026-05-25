@@ -2,6 +2,10 @@
   <main class="container view-visao-geral">
     <MonthTabs />
     <SummaryCards />
+    <div class="visao-geral-grid">
+      <SectionPieChart />
+      <PeriodSummary />
+    </div>
     <ConsolidatedPanel />
     <AnnualChart />
 
@@ -14,6 +18,8 @@
 import { ref } from 'vue'
 import MonthTabs from '@/components/gastos/MonthTabs.vue'
 import SummaryCards from '@/components/gastos/SummaryCards.vue'
+import SectionPieChart from '@/components/gastos/SectionPieChart.vue'
+import PeriodSummary from '@/components/gastos/PeriodSummary.vue'
 import ConsolidatedPanel from '@/components/gastos/ConsolidatedPanel.vue'
 import AnnualChart from '@/components/gastos/AnnualChart.vue'
 import AnoModal from '@/components/modals/AnoModal.vue'

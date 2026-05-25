@@ -2045,3 +2045,330 @@ body:has(.btn-fab:not(.hidden)) .toast {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Feature 6 — Comparativo mês a mês (delta nos cards)
+   ═══════════════════════════════════════════════════════════ */
+.card-delta {
+    display: block;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.card-delta--pos     { color: var(--green); }
+.card-delta--neg     { color: var(--red); }
+.card-delta--neutral { color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════════════
+   Feature 4 — Gráfico de pizza por seção
+   ═══════════════════════════════════════════════════════════ */
+.section-pie-panel .panel-header { align-items: flex-start; }
+
+.pie-tipo-toggle {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.pie-chart-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+}
+
+.pie-chart-wrap canvas {
+    max-width: 200px;
+    max-height: 200px;
+}
+
+.pie-legend {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pie-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.pie-legend-dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.pie-legend-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.pie-legend-pct {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 34px;
+    text-align: right;
+}
+
+.pie-legend-val {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 100px;
+    text-align: right;
+}
+
+@media (min-width: 600px) {
+    .pie-chart-wrap {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    .pie-chart-wrap canvas {
+        flex-shrink: 0;
+        max-width: 180px;
+        max-height: 180px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Feature 3 — Resumo por período na Visão Geral
+   ═══════════════════════════════════════════════════════════ */
+.period-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 20px 16px;
+}
+
+.period-totals {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0 20px 20px;
+}
+
+.period-total-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.period-total-label {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.period-total-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+@media (min-width: 600px) {
+    .period-totals { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Visão Geral — grid 2 colunas no desktop */
+.visao-geral-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 900px) {
+    .visao-geral-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Feature 5 — Histórico de tag
+   ═══════════════════════════════════════════════════════════ */
+.tag-history-panel {
+    margin-bottom: 20px;
+}
+
+.tag-history-panel canvas {
+    padding: 8px 16px 16px;
+    max-height: 220px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Feature 7 — CopiarMesModal (reutiliza estilos de modal)
+   ═══════════════════════════════════════════════════════════ */
+.form-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 12px;
+}
+.form-warn {
+    font-size: 13px;
+    color: var(--red);
+    background: var(--red-soft);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--red);
+    margin: 4px 0;
+}
+.field-group {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.field-group legend {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 4px;
+}
+.field-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.field-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--petrol);
+    cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Feature 8 — Notas do mês
+   ═══════════════════════════════════════════════════════════ */
+.month-note {
+    margin: 20px 0;
+    padding: 14px 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--gold);
+}
+
+.month-note--editing {
+    border-left-color: var(--petrol);
+}
+
+.month-note-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.month-note-label {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+}
+
+.month-note-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+.month-note-empty {
+    font-size: 13px;
+    color: var(--text-faint);
+    font-style: italic;
+    margin: 0;
+}
+
+.month-note-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+.month-note-textarea:focus {
+    outline: none;
+    border-color: var(--petrol);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.month-note-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: flex-end;
+}
+
+.month-note-counter {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    margin-right: auto;
+}
+
+[data-theme="dark"] .month-note {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .month-note-textarea {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .month-note-textarea:focus {
+    background: var(--surface-3);
+    border-color: var(--petrol);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Feature 4 dark mode
+   ═══════════════════════════════════════════════════════════ */
+[data-theme="dark"] .section-pie-panel,
+[data-theme="dark"] .period-summary-panel,
+[data-theme="dark"] .tag-history-panel {
+    background: var(--surface);
+    border-color: var(--border);
+}

@@ -6,11 +6,11 @@
       <button
         type="button"
         class="btn btn-ghost"
-        title="Copia os lançamentos do mês anterior para o mês atual"
-        @click="copiarMesAnterior"
+        title="Escolher mês e ano de origem para copiar lançamentos"
+        @click="copiarMesModal?.open()"
       >
         <span class="material-icons mi-inline" aria-hidden="true">content_copy</span>
-        Copiar mês anterior
+        Copiar de outro mês
       </button>
       <button type="button" class="btn btn-ghost" @click="limparMes">
         <span class="material-icons mi-inline" aria-hidden="true">delete_outline</span>
@@ -19,6 +19,7 @@
     </div>
 
     <TagFilter />
+    <TagHistoryPanel />
 
     <div class="grid-main">
       <LancamentosPanel
@@ -39,6 +40,8 @@
       />
     </div>
 
+    <MonthNote />
+
     <!-- Modais -->
     <LancamentoModal ref="lancamentoModal" />
     <AnoModal ref="anoModal" />
@@ -46,20 +49,24 @@
     <LixeiraModal ref="lixeiraModal" />
     <ExportModal ref="exportModal" />
     <RecorrentesModal ref="recorrentesModal" />
+    <CopiarMesModal ref="copiarMesModal" />
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import MonthTabs from '@/components/gastos/MonthTabs.vue'
 import LancamentosPanel from '@/components/gastos/LancamentosPanel.vue'
 import TagFilter from '@/components/gastos/TagFilter.vue'
+import TagHistoryPanel from '@/components/gastos/TagHistoryPanel.vue'
+import MonthNote from '@/components/gastos/MonthNote.vue'
 import LancamentoModal from '@/components/modals/LancamentoModal.vue'
 import AnoModal from '@/components/modals/AnoModal.vue'
 import HistoricoModal from '@/components/modals/HistoricoModal.vue'
 import LixeiraModal from '@/components/modals/LixeiraModal.vue'
 import ExportModal from '@/components/modals/ExportModal.vue'
 import RecorrentesModal from '@/components/modals/RecorrentesModal.vue'
+import CopiarMesModal from '@/components/modals/CopiarMesModal.vue'
 import { useGastosStore } from '@/stores/gastos'
 import { useToast } from '@/composables/useToast'
 
@@ -72,6 +79,7 @@ const historicoModal = ref(null)
 const lixeiraModal = ref(null)
 const exportModal = ref(null)
 const recorrentesModal = ref(null)
+const copiarMesModal = ref(null)
 
 // Expõe para AppHeader via provide/inject ou eventos do router
 defineExpose({
@@ -119,18 +127,6 @@ async function limparMes() {
   if (!confirm(`Mover todos os lançamentos de ${mesNome} ${gastosStore.ano} para a lixeira? Esta ação pode ser desfeita pela lixeira.`)) return
   try {
     await gastosStore.limparMes()
-  } catch (err) {
-    toast(err.message, true)
-  }
-}
-
-async function copiarMesAnterior() {
-  const mesAtual = MESES_NOMES[gastosStore.mes - 1] || `Mês ${gastosStore.mes}`
-  const mesOrigemIdx = gastosStore.mes === 1 ? 11 : gastosStore.mes - 2
-  const mesOrigem = MESES_NOMES[mesOrigemIdx] || ''
-  if (!confirm(`Copiar os lançamentos de ${mesOrigem} para ${mesAtual} ${gastosStore.ano}? Os itens copiados não virão marcados como pagos.`)) return
-  try {
-    await gastosStore.copiarMesAnterior()
   } catch (err) {
     toast(err.message, true)
   }
