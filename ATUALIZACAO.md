@@ -1,227 +1,183 @@
-# Atualizar produção após mudanças no GitHub
+# Guia de Atualização — Monesy em Produção
 
-Guia para publicar alterações do **Flask** ou do **frontend Vue** no VPS (Hostinger).
-
-Pré-requisito: deploy inicial concluído — ver [DEPLOY.md](DEPLOY.md).
-
----
-
-## Fluxo resumido
-
-```text
-PC: git push origin main
-        ↓
-VPS: git pull → (pip install) → (npm run build) → systemctl restart monesy
-        ↓
-Testar: curl /api/config + site no navegador (Ctrl+Shift+R)
-```
+> Fluxo testado e validado para o VPS Hostinger (Ubuntu 22.04).  
+> **Regra de ouro:** build local no Windows → enviar `dist/` via SCP → corrigir permissões → reiniciar.
 
 ---
 
-## 1. No seu computador (antes do servidor)
+## Por que buildar localmente?
 
-```bash
-git add .
-git commit -m "descrição da mudança"
-git push origin main
-```
+O VPS usa uma versão antiga do Node.js que é incompatível com o Vite 5.  
+A solução é **sempre buildar na máquina Windows** e enviar apenas a pasta `dist/` pronta para o servidor.  
+O VPS só precisa do Python/Flask para rodar — não precisa de Node.js.
 
 ---
 
-## 2. No VPS — atualização completa
+## Passo a passo completo
 
-Conecte via SSH:
+### 1. Atualizar o código local
 
-```bash
-ssh root@SEU_IP_DO_VPS
-```
+No terminal Windows (cmd ou PowerShell), na pasta do projeto:
 
-Entre como usuário da aplicação:
-
-```bash
-sudo -u monesy -i
-cd /home/monesy/monesy
-```
-
-### 2.1 Baixar código novo
-
-```bash
+```cmd
+cd "C:\Users\Guilherme\OneDrive\Documentos\Projeto CheckList\monesy"
 git pull origin main
 ```
 
-### 2.2 Dependências Python
+---
 
-Sempre após o pull (rápido se nada mudou):
+### 2. Buildar o frontend
 
-```bash
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2.3 Build do frontend Vue
-
-Necessário se alterou anything em `frontend/` (componentes, CSS, rotas, etc.):
-
-```bash
-cd frontend
-npm install
+```cmd
+cd "C:\Users\Guilherme\OneDrive\Documentos\Projeto CheckList\monesy\frontend"
 npm run build
-cd ..
 ```
 
-Confirme:
+Confirme que o build foi gerado:
 
-```bash
-ls frontend/dist/index.html
+```cmd
+dir "C:\Users\Guilherme\OneDrive\Documentos\Projeto CheckList\monesy\frontend\dist\index.html"
 ```
 
-### 2.4 Reiniciar a aplicação
+Deve exibir o arquivo sem erro.
 
-Saia do usuário `monesy` se precisar de `sudo`:
+---
+
+### 3. Enviar o `dist/` para o VPS via SCP
+
+> ⚠️ **Use `\dist\.` com ponto no final.** Isso copia o *conteúdo* da pasta, evitando criar `dist/dist/` no servidor.
+
+Abra o **PowerShell** e execute:
+
+```powershell
+scp -r "C:\Users\Guilherme\OneDrive\Documentos\Projeto CheckList\monesy\frontend\dist\." root@IP_DO_VPS:/home/monesy/monesy/frontend/dist/
+```
+
+---
+
+### 4. Corrigir permissões no VPS
+
+> ⚠️ **Este passo é obrigatório após cada SCP.**  
+> O SCP enviado como `root` cria os arquivos com dono `root`, impedindo que o Flask (que roda como usuário `monesy`) leia os arquivos. Isso causa o erro `{"error":"Not found"}` no site.
+
+No terminal SSH do VPS:
 
 ```bash
-exit
+sudo chown -R monesy:monesy /home/monesy/monesy/frontend/dist
+sudo chmod -R 755 /home/monesy/monesy/frontend/dist
+```
+
+Confirme que ficou correto:
+
+```bash
+ls -la /home/monesy/monesy/frontend/dist/
+```
+
+A saída deve mostrar `monesy monesy` como dono — **não** `root root`:
+
+```
+drwxr-xr-x  4 monesy monesy  4096 ...  assets/
+drwxr-xr-x  5 monesy monesy  4096 ...  design-system/
+-rw-r--r--  1 monesy monesy   986 ...  index.html
+```
+
+---
+
+### 5. Reiniciar o serviço Flask
+
+```bash
 sudo systemctl restart monesy
+```
+
+Verifique se está rodando:
+
+```bash
 sudo systemctl status monesy
 ```
 
-Esperado: **`Active: active (running)`**.
-
-### 2.5 Verificar
-
-```bash
-curl -s https://monesy.com.br/api/config
-```
-
-No navegador: `https://monesy.com.br` — use **Ctrl+Shift+R** (hard reload).
+Deve aparecer **`active (running)`** em verde.
 
 ---
 
-## 3. O que fazer conforme o tipo de mudança
+### 6. Testar
 
-| Você alterou | Passos no VPS |
-|--------------|---------------|
-| Só **backend** (`app.py`, `auth.py`, `db/`, etc.) | `git pull` → `pip install -r requirements.txt` → `systemctl restart monesy` |
-| Só **frontend** (`frontend/src/`, assets, etc.) | `git pull` → `npm install && npm run build` em `frontend/` → `systemctl restart monesy` |
-| **Backend + frontend** | Todos os passos da seção 2 |
-| Só **`.env`** (senhas, MySQL, JWT) | Editar `/home/monesy/monesy/.env` no servidor → `systemctl restart monesy` |
-| **`mysql_schema.sql`** (estrutura do banco) | Aplicar SQL no MySQL manualmente → depois `git pull` + restart |
-
-> O arquivo `.env` **não** vem do GitHub (está no `.gitignore`). Edite-o direto no VPS.
+Acesse **https://monesy.com.br** e pressione **Ctrl + Shift + R** (hard refresh) para limpar o cache do navegador.
 
 ---
 
-## 4. Comandos em sequência (copiar e colar)
+## Quando há novas features na tela de histórico
 
-Como **root** ou com `sudo` onde indicado:
+Se o deploy incluiu novas features, elas precisam ser inseridas na tabela MySQL.  
+Execute no VPS após o passo 1:
 
 ```bash
-sudo -u monesy bash -lc '
-  cd /home/monesy/monesy
-  git pull origin main
-  source .venv/bin/activate
-  pip install -r requirements.txt
-  cd frontend && npm install && npm run build && cd ..
-'
-
-sudo systemctl restart monesy
-sudo systemctl status monesy --no-pager
-curl -s https://monesy.com.br/api/config
+cd /home/monesy/monesy
+source .venv/bin/activate
+python scripts/inserir_features.py
 ```
-
-Substitua `https://monesy.com.br` pelo seu domínio ou `http://SEU_IP` se ainda não tiver HTTPS.
 
 ---
 
-## 5. Script opcional (`deploy.sh`)
+## Quando só o backend mudou (sem alterações no frontend)
 
-No VPS, como usuário `monesy`:
-
-```bash
-nano /home/monesy/deploy.sh
-```
-
-Conteúdo:
+Se apenas arquivos Python foram alterados (`app.py`, `db/`, etc.), não é necessário refazer o build. Basta:
 
 ```bash
-#!/bin/bash
-set -e
+# No VPS
 cd /home/monesy/monesy
 git pull origin main
 source .venv/bin/activate
-pip install -r requirements.txt -q
-cd frontend && npm install -q && npm run build && cd ..
+pip install -r requirements.txt   # só se requirements.txt mudou
 sudo systemctl restart monesy
-sleep 2
-curl -s https://monesy.com.br/api/config
-echo ""
-echo "Deploy concluído."
-```
-
-Ativar:
-
-```bash
-chmod +x /home/monesy/deploy.sh
-```
-
-Uso (pedirá senha do sudo se `monesy` não tiver NOPASSWD):
-
-```bash
-./deploy.sh
 ```
 
 ---
 
-## 6. Nginx e SSL
+## Checklist rápido
 
-**Não** é necessário reiniciar o Nginx a cada deploy de código.
-
-Reinicie só se alterou:
-
-- `/etc/nginx/sites-available/monesy`
-- certificados SSL
-- domínio ou redirecionamentos
-
-```bash
-sudo nginx -t
-sudo systemctl reload nginx
+```
+[ ] git pull origin main                        (Windows — atualiza código local)
+[ ] npm run build                               (Windows — gera frontend/dist/)
+[ ] scp .../dist/. root@IP:/...dist/            (PowerShell — envia para o VPS)
+[ ] chown -R monesy:monesy .../dist             (VPS — corrige dono dos arquivos)
+[ ] chmod -R 755 .../dist                       (VPS — corrige permissões de leitura)
+[ ] systemctl restart monesy                    (VPS — reinicia o serviço)
+[ ] python scripts/inserir_features.py          (VPS — só se houver novas features)
+[ ] Ctrl+Shift+R no navegador                   (limpa cache do browser)
 ```
 
 ---
 
-## 7. Se algo der errado
+## Erros comuns e soluções
 
-```bash
-# Logs da aplicação
-sudo journalctl -u monesy -n 50 --no-pager
-sudo tail -30 /var/log/monesy/error.log
-
-# App responde localmente?
-curl -s http://127.0.0.1/api/config
-
-# Socket do Gunicorn existe?
-ls -la /run/monesy/monesy.sock
-```
-
-Problemas comuns após deploy:
-
-| Sintoma | Causa provável | Ação |
-|---------|----------------|------|
-| Site antigo no navegador | Cache | Ctrl+Shift+R |
-| 502 Bad Gateway | Serviço parado | `systemctl status monesy` |
-| Página em branco | Build ausente | `cd frontend && npm run build` |
-| Erro de import Python | Dependência nova | `pip install -r requirements.txt` |
-
-Mais detalhes: seção **8** de [DEPLOY.md](DEPLOY.md).
+| Erro | Causa | Solução |
+|---|---|---|
+| `{"error":"Not found"}` no site | `dist/` com dono `root` — Flask não consegue ler os arquivos | `sudo chown -R monesy:monesy .../dist` → reiniciar |
+| Site com versão antiga após deploy | Cache do navegador | Ctrl+Shift+R (hard refresh) |
+| `dist/dist/` criado no servidor | SCP sem `\.` no final do caminho | `mv dist/dist/* dist/ && rm -rf dist/dist` → corrigir permissões → reiniciar |
+| `SyntaxError: Unexpected reserved word` ao tentar buildar no VPS | Node.js desatualizado no servidor | Buildar localmente no Windows e enviar via SCP |
+| `ssh: Could not resolve hostname` no SCP | Caminho Windows mal formatado | Usar PowerShell com aspas duplas e `\.` no final |
+| Features não aparecem na tela | Tabela MySQL não atualizada | `python scripts/inserir_features.py` no VPS |
+| 502 Bad Gateway | Serviço parado ou travado | `sudo systemctl restart monesy` → verificar `journalctl -u monesy -n 30` |
 
 ---
 
-## 8. Checklist rápido
+## Diagnóstico rápido
 
-- [ ] `git push` feito no GitHub
-- [ ] `git pull` no VPS
-- [ ] `pip install -r requirements.txt`
-- [ ] `npm run build` (se mudou frontend)
-- [ ] `systemctl restart monesy` → `active (running)`
-- [ ] `curl .../api/config` OK
-- [ ] Site testado no navegador
+```bash
+# Ver logs do serviço
+sudo journalctl -u monesy -n 30 --no-pager
+
+# Verificar estrutura e permissões do dist
+ls -la /home/monesy/monesy/frontend/dist/
+
+# Testar se o Flask responde
+curl -s http://localhost:5001/api/config
+```
+
+---
+
+## Referências
+
+- Guia completo de primeiro deploy: [`DEPLOY.md`](DEPLOY.md)
+- Script de features MySQL: [`scripts/inserir_features.py`](scripts/inserir_features.py)
